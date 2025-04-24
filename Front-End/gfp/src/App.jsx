@@ -6,7 +6,7 @@ export default function app () {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Login/>} />
         <Route path="/principal" element={<Principal />} />
       </Routes>
     </Router>

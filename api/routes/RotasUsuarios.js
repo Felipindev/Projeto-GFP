@@ -48,7 +48,7 @@ class RotasUsuarios {
     static async login(req,res){
         const { email, senha } = req.body;
         try {
-            const usuario = await BD.query(`SELECT * FROM usuarios WHERE email = $1`, [email]);
+            const usuario = await BD.query(`SELECT * FROM usuarios WHERE email = $1 and ativo = true`, [email]);
             if (usuario.rows.length === 0) {
                 return res.status(401).json({ error: "Usuário não encontrado" });
             }
@@ -67,7 +67,11 @@ class RotasUsuarios {
                 {expiresIn: '1h'}
             )
 
-            return res.status(200).json({message: 'Login executado com sucesso', token});
+            return res.status(200).json({token, 
+                id_usuario: usuario.id_usuario, 
+                nome: usuario.nome, 
+                email: usuario.email, 
+                tipo_acesso: usuario.tipo_acesso});
             // return res.status(200).json({ message: "Login bem-sucedido" })
 
         } catch (error) {
@@ -148,7 +152,7 @@ class RotasUsuarios {
     static async deletar(req,res) {
         const {id_usuario} = req.params;
         try {
-            const resultado = await BD.query(`UPDATE usuarios SET ativos = false WHERE id_usuario = ${id} RETURNING *`);
+            const resultado = await BD.query(`UPDATE usuarios SET ativo = false WHERE id_usuario = ${id_usuario} RETURNING *`);
             if (resultado.rows.length === 0) {
                 return res.status(404).json({
                     message: "Usuário não encontrado."

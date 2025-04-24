@@ -66,7 +66,7 @@ class RotasTransacoes {
         LEFT JOIN local_transacao lt ON t.id_local_transacao = lt.id_local_transacao
         LEFT JOIN categorias c ON t.id_categoria = c.id_categoria
         LEFT JOIN subcategorias sc ON t.id_subcategoria = sc.id_subcategoria
-        JOIN usuarios u ON t.id_usuario = u.id_usuario;`);
+        JOIN usuarios u ON t.id_usuario = u.id_usuario`);
         res.status(200).json(transacoes.rows);
     } catch (error) {
       console.error("Erro ao listar as transações:", error);
@@ -98,7 +98,13 @@ class RotasTransacoes {
         LEFT JOIN categorias c ON t.id_categoria = c.id_categoria
         LEFT JOIN subcategorias sc ON t.id_subcategoria = sc.id_subcategoria
         JOIN usuarios u ON t.id_usuario = u.id_usuario
-        ORDER BY t.id_transacao ASC;`)
+        WHERE id_transacao = $1
+        ORDER BY t.id_transacao ASC` , [id_transacao]);
+
+        if (transacao.rows.length === 0) {
+            return res.status(404).json({ error: "Transação não encontrada" });
+        }
+        res.status(200).json(transacao.rows[0]);
     } catch (error) {
         console.error("Erro ao listar a transação:", error);
         res.status(500).json({ error: "Erro ao listar a transação" });

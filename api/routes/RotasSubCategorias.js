@@ -26,11 +26,11 @@ class RotasSubCategorias {
     }
 
     static async listarPorID(req,res){
-        const { id_subcategoria } = req.params;
+        const { id_subCategoria } = req.params;
         try {
-            const subcategoria = await BD.query(`SELECT sc. *, c.nome AS nome FROM subCategorias AS sc
-                    LEFT JOIN categorias c ON sc.id_categoria= c.id_categoria WHERE sc.id_categoria = 1
-                ORDER BY sc.id_categoria`, [id_subcategoria]);
+            const subcategoria = await BD.query(`SELECT sc. *, c.nome AS nome FROM subcategorias AS sc
+                    LEFT JOIN categorias c ON sc.id_categoria= c.id_categoria WHERE sc.id_subcategoria = $1
+                ORDER BY sc.id_subcategoria`, [id_subCategoria]);
             if (subcategoria.rows.length === 0) {
                 return res.status(404).json({ error: "Subcategoria não encontrado" });
             }
@@ -42,11 +42,11 @@ class RotasSubCategorias {
     }
 
     static async atualizarTodos(req,res){
-        const { id_subcategoria } = req.params;
+        const { id_subCategoria } = req.params;
         const { nome, id_categoria, gasto_fixo, ativo } = req.body;
 
         try {
-            const categoria = await BD.query(`UPDATE subcategorias SET nome = $1, id_categoria = $2, gasto_fixo = $3, ativo = $4 WHERE id_categoria = $5 RETURNING *`, [nome, id_categoria, gasto_fixo, ativo, id_subcategoria]);
+            const categoria = await BD.query(`UPDATE subcategorias SET nome = $1, id_categoria = $2, gasto_fixo = $3, ativo = $4 WHERE id_subcategoria = $5 RETURNING *`, [nome, id_categoria, gasto_fixo, ativo, id_subCategoria]);
             if (categoria.rows.length === 0) {
                 return res.status(404).json({ error: "subCategoria não encontrado" });
             }
@@ -58,7 +58,7 @@ class RotasSubCategorias {
     }
 
     static async atualizar(req,res){
-        const { id_subcategoria } = req.params;
+        const { id_subCategoria } = req.params;
         const { nome, id_categoria, gasto_fixo, ativo } = req.body;
 
         try {
@@ -86,7 +86,7 @@ class RotasSubCategorias {
                 return res.status(400).json({ error: "Nenhum campo para atualizar foi fornecido" });
             }
 
-            const query = `UPDATE subcategorias SET ${campos.join(', ')} WHERE id_subcategoria = $${id_subcategoria} RETURNING *`;
+            const query = `UPDATE subcategorias SET ${campos.join(', ')} WHERE id_subcategoria = ${id_subCategoria} RETURNING *`;
             const resultado = await BD.query(query, valores);
 
             if (resultado.rows.length === 0) {
@@ -101,9 +101,9 @@ class RotasSubCategorias {
     }
 
     static async deletar(req,res){
-        const { id_subcategoria } = req.params;
+        const { id_subCategoria } = req.params;
         try {
-            const resultado = await BD.query(`UPDATE subcategorias SET ativo = false WHERE id_categoria = ${id_subcategoria} RETURNING *`);
+            const resultado = await BD.query(`UPDATE subcategorias SET ativo = false WHERE id_subcategoria = ${id_subCategoria} RETURNING *`);
             if (resultado.rows.length === 0) {
                 return res.status(404).json({ error: "Subcategoria não encontrado" });
             }

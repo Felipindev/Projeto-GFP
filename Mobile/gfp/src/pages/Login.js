@@ -1,13 +1,51 @@
 import { View, Text, TouchableOpacity, StyleSheet, Image, TextInput } from 'react-native';
+import { useState } from 'react';
 
 export default function Login({ navigation }) {
+    const [email, setEmail] = useState("");
+    const [senha, setSenha] = useState("");
+
+    async function login() {
+            try {
+                if (email === "" || senha === "") {
+                    alert("Preencha todos os campos!");
+                    throw new Error("Preencha todos os campos!");
+                }
+                const resposta = await fetch(`${enderecoServidor}/usuarios/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        senha: senha,
+                    }),
+                })
+                if (resposta.ok) {
+                    const dados = await resposta.json();
+                    // localStorage.setItem('token', dados.token);
+                    // localStorage.setItem('usuario', JSON.stringify(dados.usuario));
+                    // navigate('/principal');
+                } else {
+                    const erro = await resposta.json();
+                    alert(erro.message);
+                    throw new Error(erro.message);
+                }
+            } catch (error) {
+                console.error("Erro ao fazer login:", error);
+                alert(error.message);
+                return 
+            }
+        }
+
+
     return (
         <View style={styles.container}>
             <Image source={require('../assets/logo(2).png')} style={styles.logo} />
             <Text style={styles.title}>Bem-vindo ao GFP</Text>
             <Text style={styles.subtitle}>Gerencie suas finanças de forma simples e eficiente</Text>
-            <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#aaa" />
-            <TextInput style={styles.input} placeholder="Senha" placeholderTextColor="#aaa" secureTextEntry />
+            <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#aaa" onChange={(e) => setEmail(e.nativeEvent.text)} />
+            <TextInput style={styles.input} placeholder="Senha" placeholderTextColor="#aaa" onChange={(e) => setSenha(e.nativeEvent.text)} secureTextEntry />
             <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('MenuDrawer')}>
                 <Text style={styles.buttonText}>Entrar</Text>
             </TouchableOpacity>
