@@ -4,10 +4,14 @@ const secretKey = "chave-secreta";
  
 class RotasSubCategorias {
     static async nova(req, res) {
-        const {nome, id_categoria, gasto_fixo, ativo } = req.body;
+        const {nome, id_categoria, gasto_fixo, ativo, cor, icone } = req.body;
         try {
-            const subcategoria = await BD.query(`INSERT INTO subcategorias (nome, id_categoria, gasto_fixo, ativo)
-                VALUES ($1, $2, $3, $4) RETURNING *`, [nome, id_categoria, gasto_fixo, ativo]);
+            const subcategoria = await BD.query(`INSERT INTO subcategorias (nome, id_categoria, gasto_fixo, ativo, cor, icone)
+                VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`, [nome, id_categoria, gasto_fixo, ativo, cor, icone]);
+
+            if (subcategoria.rows.length === 0) {
+                return res.status(404).json({ error: "Subcategoria não encontrada" });
+            }
             res.status(201).json('Subcategoria criada com sucesso!');
         } catch (error) {
             console.error("Erro ao criar a subcategoria:", error);

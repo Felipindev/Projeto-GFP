@@ -5,15 +5,18 @@ const secretKey = "chave-secreta";
 
 class RotasCategorias {
     static async nova(req,res) {
-        const { nome, tipo_transacao, gasto_fixo, id_usuario } = req.body;
+        const { nome, tipo_transacao, gasto_fixo, id_usuario, cor, icone } = req.body;
         try {
-            const categoria = await BD.query(`INSERT INTO categorias (nome, tipo_transacao, gasto_fixo, id_usuario)
-                VALUES ($1, $2, $3, $4) RETURNING *`, [nome, tipo_transacao, gasto_fixo, id_usuario]);
+            const categoria = await BD.query(`INSERT INTO categorias (nome, tipo_transacao, gasto_fixo, id_usuario, cor, icone)
+                VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`, [nome, tipo_transacao, gasto_fixo, id_usuario, cor, icone]);
+
+            if (categoria.rows.length === 0) {
+                    return res.status(404).json({ error: "Categoria não encontrada" });
+                }
             res.status(201).json('Categoria criada com sucesso!');
         } catch (error) {
             console.error("Erro ao criar a categoria:", error);
             res.status(500).json({ error: "Erro ao criar a categoria" });
-            
         }
     }
 
@@ -117,6 +120,41 @@ class RotasCategorias {
         } catch (error) {
             console.error("Erro ao excluir a categoria:", error);
             res.status(500).json({ error: "Erro ao excluir a categoria" });
+        }
+    }
+
+    //funçaõ de filtrar por tipo de categoria (entrada ou saida)
+    static async filtrarCategoria(req,res){
+        //o valor sera enviado por parametro na url
+        //exemplo: /categorias?tipo_transacao=entrada
+        const { tipo_transacao } = req.query;
+
+        try {
+            const filtros = [];
+            const valores = [];
+
+            //validar se o tipo de transação foi fornecido
+            if(tipo_transacao){
+                filtros.push(`tipo_transacao = $${valores.length + 1}`);
+                valores.push(tipo_transacao);
+            }
+
+            if(filtros.length === 0){
+                return res.status(400).json({
+                    message: "Nenhum filtro fornecido."
+                });
+            }
+            
+            const query = `SELECT * FROM categorias ${filtros.length ? `WHERE ${filtros.join(" AND ")}` :  ""}
+            AND ativo = true 
+            ORDER BY id_categoria DESC`;
+
+            const resultado = await BD.query(query, valores)
+            res.status(200).json(resultado.rows);
+
+        } catch (error) {
+            console.error("Erro ao filtrar a categoria:", error);
+            res.status(500).json({ error: "Erro ao filtrar a categoria" });
         }
     }
 }
