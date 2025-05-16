@@ -117,23 +117,18 @@ class RotasSubCategorias {
             res.status(500).json({ error: "Erro ao excluir a subCategoria" });
         }
     }
+
+    //filtrar por nome
+    static async filtrarPorNome(req, res){
+        const { nome } = req.query;
+        try {
+            const subcategorias = await BD.query(`SELECT * FROM subcategorias WHERE nome LIKE '%${nome}%'`);
+            res.status(200).json(subcategorias.rows);
+        } catch (error) {
+            console.error("Erro ao filtrar as subcategorias:", error);
+            res.status(500).json({ error: "Erro ao filtrar as subcategorias" });
+        }
+    }
 }
 
-export function autenticarToken3(req, res, next){
-    //extrair o token do cabeçalho da requisição
-    const token = req.headers['authorization'] //bearer<token>
-
-    //verificar se o token foi fornecido na requisição
-    if (!token) return res.status(403).json({message: 'Token não fornecido'})
-
-    //verificar se o token é válido
-    jwt.verify(token.split(' ')[1], secretKey, (err, subcategoria ) => {
-        if(err) return res.status(403).json({mensagem: 'Token inválido'})
-
-        //se o token é válido, adiciona os dados do usuario (decoficados no token)
-        //tornando essas informações disponíveis nas rotas que precisam da autenticação
-        req.subcategoria = subcategoria;
-        next(); //continua para a próxima rota
-    })
-}
 export default RotasSubCategorias;

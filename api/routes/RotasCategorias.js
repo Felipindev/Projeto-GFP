@@ -125,55 +125,21 @@ class RotasCategorias {
 
     //funçaõ de filtrar por tipo de categoria (entrada ou saida)
     static async filtrarCategoria(req,res){
-        //o valor sera enviado por parametro na url
-        //exemplo: /categorias?tipo_transacao=entrada
-        const { tipo_transacao } = req.query;
+       const {tipo_transacao} = req.query
+       try {
+            const query = `SELECT * FROM categorias WHERE tipo_transacao LIKE $1 AND ativo = true ORDER BY nome DESC`;
+            const valores = [`%${tipo_transacao}%`]
+            const resposta = await BD.query(query, valores)
 
-        try {
-            const filtros = [];
-            const valores = [];
-
-            //validar se o tipo de transação foi fornecido
-            if(tipo_transacao){
-                filtros.push(`tipo_transacao = $${valores.length + 1}`);
-                valores.push(tipo_transacao);
+            if (resposta.rows.length === 0) {
+                return res.status(404).json({ error: "Nenhuma categoria encontrada com este tipo" });
             }
-
-            if(filtros.length === 0){
-                return res.status(400).json({
-                    message: "Nenhum filtro fornecido."
-                });
-            }
-            
-            const query = `SELECT * FROM categorias ${filtros.length ? `WHERE ${filtros.join(" AND ")}` :  ""}
-            AND ativo = true 
-            ORDER BY id_categoria DESC`;
-
-            const resultado = await BD.query(query, valores)
-            res.status(200).json(resultado.rows);
-
-        } catch (error) {
+            return res.status(200).json(resposta.rows)
+       } catch (error) {
             console.error("Erro ao filtrar a categoria:", error);
-            res.status(500).json({ error: "Erro ao filtrar a categoria" });
-        }
+            res.status(500).json({ message: "Erro ao filtrar categoria", error: error.message });
+       }
     }
 }
 
-export function autenticarToken2(req, res, next){
-    //extrair o token do cabeçalho da requisição
-    const token = req.headers['authorization'] //bearer<token>
-
-    //verificar se o token foi fornecido na requisição
-    if (!token) return res.status(403).json({message: 'Token não fornecido'})
-
-    //verificar se o token é válido
-    jwt.verify(token.split(' ')[1], secretKey, (err, categoria ) => {
-        if(err) return res.status(403).json({mensagem: 'Token inválido'})
-
-        //se o token é válido, adiciona os dados do usuario (decoficados no token)
-        //tornando essas informações disponíveis nas rotas que precisam da autenticação
-        req.categoria = categoria;
-        next(); //continua para a próxima rota
-    })
-}
 export default RotasCategorias;

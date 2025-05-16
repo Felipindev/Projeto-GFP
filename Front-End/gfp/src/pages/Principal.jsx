@@ -1,5 +1,82 @@
+import React, { useState, useEffect } from 'react';
+
 export default function Principal() {
+    const [usuario, setUsuario] = useState(null);
+
+    useEffect(() => {
+        // Tenta pegar do localStorage (lembrarUsuario ou usuario)
+        const lembrar = localStorage.getItem('lembrarUsuario');
+        if (lembrar) {
+            try {
+                const { usuario } = JSON.parse(lembrar);
+                setUsuario(usuario);
+                console.log("Usuário recuperado do localStorage:", usuario);
+            } catch (error) {
+                console.error("Erro ao ler lembrarUsuario do localStorage:", error);
+                setUsuario(null);
+            }
+        } else {
+            const usuarioLocal = localStorage.getItem('usuario');
+            if (usuarioLocal) {
+                try {
+                    setUsuario(JSON.parse(usuarioLocal));
+                } catch (error) {
+                    console.error("Erro ao ler usuário do localStorage:", error);
+                    setUsuario(null);
+                }
+            }
+        }
+    }, []);
+
     return (
-        <h1>Tela Principal</h1>
+        <div style={styles.container}>
+            <h1 style={styles.Title}>
+                Bem-vindo ao GFP{usuario && usuario ? `, ${usuario}` : ""}!
+            </h1>
+            <button style={styles.buttonSair} onClick={() => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('usuario');
+                localStorage.removeItem('lembrarUsuario');
+                window.location.href = '/';
+            }}>Sair</button>
+            <h2 style={styles.subtitle}>Gerenciador de Finanças Pessoais</h2>
+            <h3 style={styles.subtitle}>Tela Principal</h3>
+            <p style={styles.subtitle}>Esta é a tela principal do seu aplicativo de finanças pessoais.</p>
+        </div>
     )
+}
+
+const styles = {
+    buttonSair: {
+        backgroundColor: '#ff0000',
+        color: '#fff',
+        padding: '10px 20px',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        marginBottom: '20px',
+    },
+    container: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        backgroundColor: '#1e293b',
+        padding: '20px',
+        margin: 'auto',
+    },
+    Title: {
+        fontSize: '28px',
+        fontWeight: 'bold',
+        color: '#41d3be',
+        marginBottom: '10px',
+        textAlign: 'center',
+    },
+    subtitle: {
+        fontSize: '16px',
+        color: '#94a3b8',
+        marginBottom: '30px',
+        textAlign: 'center',
+    },
 }

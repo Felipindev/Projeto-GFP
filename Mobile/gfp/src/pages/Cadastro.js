@@ -5,9 +5,9 @@ import {
   StyleSheet,
   Image,
   TextInput,
-  Switch,
 } from "react-native";
-import { useState, useEffect } from "react";
+import { Picker } from '@react-native-picker/picker';
+import { useState } from "react";
 import { enderecoServidor } from "../utils";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,52 +17,43 @@ const EyeIcon = ({ visible }) => (
   <Text style={{ fontSize: 22 }}>{visible ? "🙈" : "👁️"}</Text>
 );
 
-export default function Login({ navigation }) {
+export default function Cadastro({ navigation }) {
+  const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [tipoAcesso, setTipoAcesso] = useState("usuario");
   const [mostrarSenha, setMostrarSenha] = useState(false);
-  const [lembrar, setLembrar] = useState(false);
 
-  useEffect(() => {
-    const buscarUsuarioLogado = async () => {
-      const usuarioLogado = await AsyncStorage.getItem("UsuarioLogado");
-      if (usuarioLogado) {
-        const usuario = JSON.parse(usuarioLogado);
-        if(usuario.lembrar == true){
-          navigation.navigate("MenuDrawer");
-        }
-      }
-    }
-
-    buscarUsuarioLogado();
-},[])
-
-  const botaoLogin = async () => {
+  const botaoCadastro = async () => {
     try {
-      if (email === "" || senha === "") {
+      if (nome === "" || email === "" || senha === "" || tipoAcesso === "") {
         throw new Error("Preencha todos os campos");
       }
-      const resposta = await fetch(`${enderecoServidor}/usuarios/login`, {
+      const resposta = await fetch(`${enderecoServidor}/usuarios`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          nome: nome,
           email: email,
           senha: senha,
+          tipo_acesso: tipoAcesso,
         }),
       });
+
       const dados = await resposta.json();
 
       if (resposta.ok) {
-        console.log("Login bem-sucedido:", dados);
-        AsyncStorage.setItem("UsuarioLogado", JSON.stringify({...dados, lembrar}));
-        navigation.navigate("MenuDrawer");
+        alert("Cadastro realizado com sucesso!");
+        navigation.navigate("Login");
+        console.log("Cadastro realizado com sucesso:", dados);
       } else {
-        throw new Error(dados.message || "Erro ao fazer login");
+        console.log("Erro do backend:", dados)
+        throw new Error(dados.error || "Erro ao cadastrar");
       }
     } catch (error) {
-      console.error("Erro ao realizar login:", error);
+      console.error("Erro ao realizar cadastro:", error);
       alert(error.message);
       return;
     }
@@ -72,10 +63,17 @@ export default function Login({ navigation }) {
     <LinearGradient colors={["#1e293b", "#0a0a0a"]} style={styles.container}>
       <View style={styles.container}>
         <Image source={require("../assets/logo(2).png")} style={styles.logo} />
-        <Text style={styles.title}>Bem-vindo ao GFP</Text>
+        <Text style={styles.title}>Crie sua conta no GFP</Text>
         <Text style={styles.subtitle}>
           Gerencie suas finanças de forma simples e eficiente
         </Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Nome"
+          placeholderTextColor="#aaa"
+          onChangeText={setNome}
+          value={nome}
+        />
         <TextInput
           style={styles.input}
           placeholder="Email"
@@ -99,28 +97,22 @@ export default function Login({ navigation }) {
             <EyeIcon visible={mostrarSenha} />
           </TouchableOpacity>
         </View>
-        <View style={styles.switch}>
-          <View style={styles.switchContainer}>
-            <Switch
-              value={lembrar}
-              onValueChange={setLembrar}
-              trackColor={{ false: "#767577", true: "#81b0ff" }}
-            />
-            <Text style={styles.switchText}>Lembrar-me</Text>
-          </View>
-
-            <Text style={styles.footerText}>
-              Esqueceu sua senha? <Text style={styles.link}>Recupere-a</Text>
-            </Text>
-          </View>
-        <TouchableOpacity style={styles.button} onPress={botaoLogin}>
-          <Text style={styles.buttonText}>Entrar</Text>
+        <Picker
+          selectedValue={tipoAcesso}
+          style={styles.input}
+          onValueChange={(itemValue) => setTipoAcesso(itemValue)}
+        >
+          <Picker.Item style={styles.valueInput} label="Usuário" value="usuario" />
+          <Picker.Item style={styles.valueInput} label="Admin" value="admin" />
+        </Picker>
+        <TouchableOpacity style={styles.button} onPress={botaoCadastro}>
+          <Text style={styles.buttonText}>Cadastrar</Text>
         </TouchableOpacity>
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Não tem uma conta?{" "}
-            <Text style={styles.link} onPress={() => navigation.navigate("Cadastro")}>
-              Cadastre-se
+            Já tem uma conta?{" "}
+            <Text style={styles.link} onPress={() => navigation.navigate("Login")}>
+              Faça login
             </Text>
           </Text>
         </View>
@@ -175,6 +167,14 @@ const styles = StyleSheet.create({
     marginLeft: -45,
     zIndex: 1,
   },
+  valueInput: {
+    color: "#f8fafc",
+    fontSize: 16,
+    backgroundColor: "#334155",
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 15,
+  },
   button: {
     backgroundColor: "#41d3be",
     paddingVertical: 15,
@@ -193,7 +193,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#94a3b8",
     textAlign: "center",
-    border: "1px solid #41d3be",
     padding: 10,
     borderRadius: 8,
     marginBottom: 15,
@@ -208,27 +207,4 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
   },
-  switch: {
-    marginBottom: 10,
-    color: "#41d3be",
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
-    borderRadius: 8,
-    display: "flex",
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 45,
-  },
-  switchText: {
-    color: "#41d3be",
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  switchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  }
 });

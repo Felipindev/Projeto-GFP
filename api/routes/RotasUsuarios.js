@@ -61,23 +61,23 @@ class RotasUsuarios {
             //gerar um token JWT para o usuário
             const token = jwt.sign(
                 //payload
-                {id_usuario: usuario.id_usuario, nome: usuario.nome, email: usuario.email},
+                {id_usuario: usuarioEncontrado.id_usuario, nome: usuarioEncontrado.nome, email: usuarioEncontrado.email},
                 //signature
                 secretKey,
                 // {expiresIn: '1h'}
             )
             console.log({token, 
-                id_usuario: usuario.id_usuario, 
-                nome: usuario.nome, 
-                email: usuario.email, 
-                tipo_acesso: usuario.tipo_acesso});
+                id_usuario: usuarioEncontrado.id_usuario, 
+                nome: usuarioEncontrado.nome, 
+                email: usuarioEncontrado.email, 
+                tipo_acesso: usuarioEncontrado.tipo_acesso});
             
 
             return res.status(200).json({token, 
-                id_usuario: usuario.id_usuario, 
-                nome: usuario.nome, 
-                email: usuario.email, 
-                tipo_acesso: usuario.tipo_acesso});
+                id_usuario: usuarioEncontrado.id_usuario, 
+                nome: usuarioEncontrado.nome, 
+                email: usuarioEncontrado.email, 
+                tipo_acesso: usuarioEncontrado.tipo_acesso});
             // return res.status(200).json({ message: "Login bem-sucedido" })
 
         } catch (error) {
@@ -175,6 +175,18 @@ class RotasUsuarios {
             res.status(500).json({
                 message:"Erro ao desativar o usuário", error: error.message
             })
+        }
+    }
+
+    //rota para filtrar por nome
+    static async filtrarPorNome(req,res) {
+        const {nome} = req.query;
+        try {
+            const resultado = await BD.query(`SELECT * FROM usuarios WHERE nome LIKE '%${nome}%'`);
+            res.status(200).json(resultado.rows);
+        } catch (error) {
+            console.error("Erro ao filtrar usuários por nome:", error);
+            res.status(500).json({ error: "Erro ao filtrar usuários por nome" });
         }
     }
 
