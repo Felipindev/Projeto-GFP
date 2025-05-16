@@ -5,7 +5,7 @@ export default function Principal() {
 
     useEffect(() => {
         // Tenta pegar do localStorage (lembrarUsuario ou usuario)
-        const lembrar = localStorage.getItem('lembrarUsuario');
+        const lembrar = localStorage.getItem('UsuarioLogado');
         if (lembrar) {
             try {
                 const { usuario } = JSON.parse(lembrar);
@@ -30,26 +30,29 @@ export default function Principal() {
 
     return (
         <div style={styles.container}>
-            <h1 style={styles.Title}>
-                Bem-vindo ao GFP{usuario && usuario ? `, ${usuario}` : ""}!
-            </h1>
-            <button style={styles.buttonSair} onClick={() => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('usuario');
-                localStorage.removeItem('lembrarUsuario');
-                window.location.href = '/';
-            }}>Sair</button>
-            <h2 style={styles.subtitle}>Gerenciador de Finanças Pessoais</h2>
-            <h3 style={styles.subtitle}>Tela Principal</h3>
-            <p style={styles.subtitle}>Esta é a tela principal do seu aplicativo de finanças pessoais.</p>
+            <div style={styles.logoContainer}>
+                <h1 style={styles.Title}>
+                    Bem-vindo ao GFP{usuario && usuario ? `, ${usuario}` : ""}!
+                </h1>
+                <button style={styles.buttonSair} onClick={() => {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('usuario');
+                    localStorage.removeItem('lembrarUsuario');
+                    window.location.href = '/';
+                }}>Sair</button>
+            </div>
+            <div style={{ marginTop: '20px' }}>
+                <h2 style={styles.subtitle}>Gerenciador de Finanças Pessoais</h2>
+                <h3 style={styles.subtitle}>Tela Principal</h3>
+                <p style={styles.subtitle}>Esta é a tela principal do seu aplicativo de finanças pessoais.</p>
+            </div>
         </div>
     )
 }
 
 const styles = {
     buttonSair: {
-        backgroundColor: '#ff0000',
-        color: '#fff',
+        backgroundColor: '#41d3be',
         padding: '10px 20px',
         border: 'none',
         borderRadius: '5px',
@@ -62,7 +65,7 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         height: '100vh',
-        backgroundColor: '#1e293b',
+        backgroundColor: '#f8f8f8',
         padding: '20px',
         margin: 'auto',
     },

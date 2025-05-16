@@ -24,16 +24,20 @@ export default function Principal ({navigation}){
     }
 
     return (
+        <View style={{backgroundColor: '#008080', flex: 1,}}>
         <View style={styles.container}>
             <View style={{alignItems: 'center', flexdirection: 'row', justifyContent: 'space-between'}}>
-            <Text style={styles.subtitle}>Bem-vindo ao GFP, {usuario.nome}!</Text>
+            <Text style={styles.title}>Bem-vindo ao GFP, {usuario.nome}!</Text>
             <TouchableOpacity style={styles.bottonSair} onPress={botaoLogOut}>
                 <Text style={styles.bottonSairText}>Sair</Text>
             </TouchableOpacity>
             </View>
-            <Text style={styles.subtitle}>Gerenciador de Finanças Pessoais</Text>
-            <Text style={styles.subtitle}>Tela Principal</Text>
-            
+            <View style={{marginTop: 20}}>
+                <Text style={styles.subtitle}>Gerenciador de Finanças Pessoais</Text>
+                <Text style={styles.subtitle}>Tela Principal</Text>
+            </View>
+        
+        </View>
         </View>
     )
 }
@@ -44,24 +48,32 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#f8f8f8',
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
+        padding: 10,
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 20,
+        color: '#008080',
     },
     subtitle: {
         fontSize: 18,
         color: '#666',
     },
     bottonSair: {
-        backgroundColor: '#41d3be',
+        backgroundColor: '#008080',
         paddingVertical: 15,
         paddingHorizontal: 20,
         borderRadius: 8,
         marginTop: 20,
-        width: '80%',
+        width: '50%',
+    },
+    bottonSairText: {
         alignItems: 'center',
         justifyContent: 'center',
+        textAlign: 'center',
+        color: '#f8f8f8',
     },
 })

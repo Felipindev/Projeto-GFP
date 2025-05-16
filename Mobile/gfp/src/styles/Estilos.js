@@ -10,5 +10,17 @@ const Estilos = {
         width: "100%",
         backgroundColor: corFundo,
     },
+    conteudoHeader: {
+        flex : 1,
+        backgroundColor: "#008080",
+        border: 'none'
+    },
+    conteudoCorpo: {
+        flex : 1,
+        backgroundColor: "#f8f8f8",
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
+        padding: 10,
+    }
 }
 export default Estilos;
