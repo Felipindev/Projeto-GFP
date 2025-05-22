@@ -50,7 +50,7 @@ class RotasUsuarios {
         try {
             const usuario = await BD.query(`SELECT * FROM usuarios WHERE email = $1 and ativo = true`, [email]);
             if (usuario.rows.length === 0) {
-                return res.status(401).json({ error: "Usuário não encontrado" });
+                return res.status(404).json({ error: "Usuário não encontrado" });
             }
             const usuarioEncontrado = usuario.rows[0];
             const senhaCorreta = await bcrypt.compare(senha, usuarioEncontrado.senha);

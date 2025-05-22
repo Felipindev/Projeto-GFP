@@ -4,10 +4,14 @@ import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Estilos from '../styles/Estilos';
 import { enderecoServidor } from '../utils';
+import { useIsFocused } from '@react-navigation/native';
 
-export default function Contas (navigation) {
+export default function Contas ({navigation}) {
     const [dadosLista, setDadosLista] = useState([]);
     const [usuario, setUsuario] = useState({});
+
+    //hook para verificar se a tela está visível para o usuário
+    const isFocused = useIsFocused()
 
     const buscarDadosAPI = async () => {
         try{
@@ -31,8 +35,10 @@ export default function Contas (navigation) {
 
     //executa quando a variavel usuario é carregada
     useEffect(() => {
-        buscarDadosAPI();
-    },[usuario])
+        if (isFocused == true){
+            buscarDadosAPI();
+        }
+    }, [usuario, isFocused])
 
     const buscarUsuarioLogado = async () => {
         const usuarioLogado = await AsyncStorage.getItem('UsuarioLogado');
@@ -68,7 +74,9 @@ export default function Contas (navigation) {
                     <Text style={styles.tipoConta}>{item.tipo_conta}</Text>
                     <Text style={styles.nomeLista}>{item.nome}</Text>
                 </View>
-                <MaterialIcons name='edit' size={24} color='#008080' style={styles.icon} />
+                <MaterialIcons name='edit' size={24} color='#008080' style={styles.icon}
+                    onPress={() => navigation.navigate('CadContas', {Conta: item})}
+                />
                 <MaterialIcons name='delete' size={24} color='#e63946' style={styles.icon}
                     onPress={() => botaoExcluir(item.id_conta)}
                 />
@@ -76,17 +84,30 @@ export default function Contas (navigation) {
         )
     }
 
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <TouchableOpacity onPress={() => navigation.navigate('CadContas')}>
+                    <MaterialIcons name="add" size={28} color="#fff"  
+                        style={{marginRight: 15}} />                    
+                </TouchableOpacity>
+            )
+        })
+    }, [navigation])
+
     return(
         <View style={Estilos.conteudoHeader}>
             <View style={Estilos.conteudoCorpo}>
-                <Text>Contas</Text> 
+                <View style={styles.containerText}>
+                    <Text style={styles.text}>ADMINISTRE <Text style={styles.textPlus}>TODAS</Text> AS SUAS CONTAS!</Text> 
+                </View>
                 {/*FlatList para exibir os dados da API*/}
                 <FlatList
                    data={dadosLista}
                    renderItem={exibirItemLista}
-                   keyExtractor={(item) => item.id_conta}
-                   
+                   keyExtractor={(item) => item.id_conta} 
                 />
+
             </View>
         </View>   
     )
@@ -136,6 +157,27 @@ const styles = StyleSheet.create({
     nomeLista: {
         fontSize: 14,
         color: '#666',
+    },
+    text: {
+        fontWeight: 'bold',
+        fontSize: 18,
+        color: '#666',
+    },
+    textPlus: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        color: '#fff',
+        border: 'solid 1px #008080',
+        padding: 10,
+        backgroundColor: '#008080',
+        borderRadius: 10,
+
+    },
+    containerText: {
+        padding: 10,
+        marginVertical: 10,
+        gap: 20,
     },
 
 })
