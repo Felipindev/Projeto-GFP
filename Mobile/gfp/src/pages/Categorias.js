@@ -1,22 +1,30 @@
-import react, { useState, useEffect, useLayoutEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image, RefreshControl} from 'react-native'
+import { Text, View, TouchableOpacity, StyleSheet, FlatList, Image, Alert, RefreshControl} from 'react-native'
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState, useEffect, useLayoutEffect} from 'react';
 import Estilos from '../styles/Estilos';
+import CorPrincipal from '../styles/Estilos'
 import { enderecoServidor } from '../utils';
-import { useIsFocused } from '@react-navigation/native';
 
-export default function Contas ({navigation}) {
+const Categorias = ({navigation}) => {
     const [dadosLista, setDadosLista] = useState([]);
     const [usuario, setUsuario] = useState({});
-    const [atualizando, setAtualizando] = useState(false)
+    const [atualizando, setAtualizando] = useState(false);
 
-    //hook para verificar se a tela está visível para o usuário
-    const isFocused = useIsFocused()
+    useLayoutEffect(() => {
+            navigation.setOptions({
+                headerRight: () => (
+                    <TouchableOpacity>
+                        <MaterialIcons name="add" size={28} color="#fff"  
+                            style={{marginRight: 15}} />                    
+                    </TouchableOpacity>
+                )
+            })
+        }, [navigation])
 
     const buscarDadosAPI = async () => {
         try{
-            const resposta = await fetch(`${enderecoServidor}/contas`,{
+            const resposta = await fetch(`${enderecoServidor}/categorias`,{
                 method: 'GET',
                 headers:{
                     'Authorization': `Bearer ${usuario.token}`,
@@ -36,10 +44,10 @@ export default function Contas ({navigation}) {
 
     //executa quando a variavel usuario é carregada
     useEffect(() => {
-        if (isFocused == true && usuario.token){
+        if (usuario && usuario.token){
             buscarDadosAPI();
         }
-    }, [usuario, isFocused])
+    }, [usuario])
 
     const buscarUsuarioLogado = async () => {
         const usuarioLogado = await AsyncStorage.getItem('UsuarioLogado');
@@ -52,7 +60,7 @@ export default function Contas ({navigation}) {
 
     const botaoExcluir = async (id) => {
         try{
-            const resposta = await fetch(`${enderecoServidor}/contas/${id}`,{
+            const resposta = await fetch(`${enderecoServidor}/categorias/${id}`,{
                 method: 'DELETE',
                 headers:{
                     'Authorization': `Bearer ${usuario.token}`,
@@ -68,59 +76,61 @@ export default function Contas ({navigation}) {
     }
 
     const exibirItemLista = ({item}) => {
-        return(
-            <TouchableOpacity style={styles.ItemLista} >
-                <Image source={require('../assets/logo(2).png')} style={styles.imagemLista} />
-                <View style={styles.textContainer}>
-                    <Text style={styles.tipoConta}>{item.tipo_conta}</Text>
-                    <Text style={styles.nomeLista}>{item.nome}</Text>
-                </View>
-                <MaterialIcons name='edit' size={24} color='#008080' style={styles.icon}
-                    onPress={() => navigation.navigate('CadContas', {Conta: item})}
-                />
-                <MaterialIcons name='delete' size={24} color='#e63946' style={styles.icon}
-                    onPress={() => botaoExcluir(item.id_conta)}
-                />
-            </TouchableOpacity>
-        )
-    }
+            return(
+                <TouchableOpacity style={styles.ItemLista} >
+                    <View style={[styles.iconeCategoria, { backgroundColor: item.cor || "#008080" }]}>
+                        <MaterialIcons
+                            name={item.icone || "category"} // nome do ícone vindo do banco, ou um padrão
+                            size={24}
+                            color={"#fff"}   // cor vinda do banco, ou um padrão
+                            />
+                    </View>
 
-    useLayoutEffect(() => {
-        navigation.setOptions({
-            headerRight: () => (
-                <TouchableOpacity onPress={() => navigation.navigate('CadContas')}>
-                    <MaterialIcons name="add" size={28} color="#fff"  
-                        style={{marginRight: 15}} />                    
+                    <View style={styles.textContainer}>
+                        <Text style={styles.nomeLista}>{item.nome.toUpperCase()}</Text>
+                        <Text style={styles.tipoTransacao}>R$00,00</Text>
+                    </View>
+                    <MaterialIcons name='edit' size={24} color='#008080' style={styles.icon}
+                        // onPress={() => navigation.navigate('CadContas', {Conta: item})}
+                    />
+                    <MaterialIcons name='delete' size={24} color='#e63946' style={styles.icon}
+                        onPress={() => botaoExcluir(item.id_categoria)}
+                    />
                 </TouchableOpacity>
             )
-        })
-    }, [navigation])
+        }
 
     return(
         <View style={Estilos.conteudoHeader}>
             <View style={Estilos.conteudoCorpo}>
                 <View style={styles.containerText}>
-                    <Text style={styles.text}>ADMINISTRE <Text style={styles.textPlus}>TODAS</Text> AS SUAS CONTAS!</Text> 
+                    <Text style={styles.text}>ADMINISTRE <Text style={styles.textPlus}>TODAS</Text> AS SUAS CATEGORIAS!</Text> 
                 </View>
                 {/*FlatList para exibir os dados da API*/}
-                <FlatList
-                   data={dadosLista}
-                   renderItem={exibirItemLista}
-                   keyExtractor={(item) => item.id_conta} 
-                   refreshControl={
-                    <RefreshControl
-                        refreshing={atualizando}
-                        onRefresh={buscarDadosAPI}
+                    <FlatList
+                        data={dadosLista}
+                        renderItem={exibirItemLista}
+                        keyExtractor={(item) => item.id_categoria} 
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={atualizando}
+                                onRefresh={buscarDadosAPI}
+                            />
+                        }
                     />
-                   }
-                />
-
             </View>
-        </View>   
+        </View>
     )
 }
+export default Categorias
 
 const styles = StyleSheet.create({
+    title: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        marginVertical: 20,
+        textAlign: 'center',
+    },
     container: {
         flex: 1,
         justifyContent: 'center',
@@ -155,15 +165,15 @@ const styles = StyleSheet.create({
     icon: {
         marginLeft: 10,
     },
-    tipoConta: {
+    tipoTransacao: {
+        fontSize: 14,
+        color: '#666',
+    },
+    nomeLista: {
         fontSize: 18,
         fontWeight: 'bold',
         color: '#333',
         marginBottom: 4,
-    },
-    nomeLista: {
-        fontSize: 14,
-        color: '#666',
     },
     text: {
         fontWeight: 'bold',
@@ -186,5 +196,14 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         gap: 20,
     },
-
+    iconeCategoria: {
+    marginRight: 16, 
+    borderRadius: 20,
+    padding: 4,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center'
+},
 })

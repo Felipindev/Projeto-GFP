@@ -83,7 +83,7 @@ export default function CadContas({navigation, route}) {
         <View style={Estilos.conteudoHeader}>
             <View style={Estilos.conteudoCorpo}>
                 <Text style={styles.titulo}>Nova Conta</Text>
-                <Text style={styles.subtitulo}>cliqe no botão "Salvar" ou clique no ícone no canto superior direito para salvar a conta</Text>
+                <Text style={styles.subtitulo}>clique no botão "Salvar" ou clique no ícone no canto superior direito para salvar a conta</Text>
                 <View style={styles.formGroup}>
                     <MaterialIcons name="account-balance-wallet" size={24} color="#008080" style={styles.icon} />
                     <TextInput
