@@ -22,6 +22,8 @@ export default function Login({ navigation }) {
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [lembrar, setLembrar] = useState(false);
+  const [erroEmail, setErroEmail] = useState("");
+  const [erroSenha, setErroSenha] = useState("");
 
   useEffect(() => {
     const buscarUsuarioLogado = async () => {
@@ -38,10 +40,20 @@ export default function Login({ navigation }) {
 },[])
 
   const botaoLogin = async () => {
-    try {
-      if (email === "" || senha === "") {
-        throw new Error("Preencha todos os campos");
-      }
+    let erro = false;
+    setErroEmail('');
+    setErroSenha('');
+    if (!email){
+      setErroEmail('Preencha o email');
+      erro = true;
+    }
+    if (!senha){
+      setErroSenha('Preencha a senha');
+      erro = true;
+    }
+    if (erro) return;
+
+      try {
       const resposta = await fetch(`${enderecoServidor}/usuarios/login`, {
         method: "POST",
         headers: {
@@ -76,6 +88,7 @@ export default function Login({ navigation }) {
         <Text style={styles.subtitle}>
           Gerencie suas finanças de forma simples e eficiente
         </Text>
+        {erroEmail ? <Text style={styles.erroMsg}>{erroEmail}</Text> : null}
         <TextInput
           style={styles.input}
           placeholder="Email"
@@ -83,6 +96,7 @@ export default function Login({ navigation }) {
           onChangeText={setEmail}
           value={email}
         />
+        {erroSenha ? <Text style={styles.erroMsg}>{erroSenha}</Text> : null}
         <View style={styles.senhaContainer}>
           <TextInput
             style={[styles.input, { flex: 1, marginBottom: 0 }]}
@@ -230,5 +244,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-  }
+  },
+  erroMsg: {
+    color: '#e63946',
+    fontSize: 14,
+    marginBottom: 8,
+    marginLeft: 8,
+},
 });

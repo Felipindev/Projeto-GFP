@@ -167,8 +167,10 @@ const styles = StyleSheet.create({
     },
     text: {
         fontWeight: 'bold',
-        fontSize: 18,
-        color: '#666',
+        fontSize: 16,
+        color: '#222',
+        textAlign: 'center',
+        letterSpacing: 1,
     },
     textPlus: {
         fontSize: 22,

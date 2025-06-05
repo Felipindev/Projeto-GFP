@@ -1258,7 +1258,51 @@ openapi: '3.0.4',
                 }
             }
         },
-        
+        '/transacao': {
+            post: {
+                tags: ['Transacoes'],
+                summary: 'Cadastrar nova transacao',
+                description: 'Rota para cadastrar uma nova transacao',
+                security: [
+                    {
+                        bearerAuth: [],
+                    }
+                ],
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                required: ['valor', 'descricao', 'data_transacao', 'data_vencimento', 'data_pagamento', 'tipo_transacao', 'id_conta', 'id_categoria', 'id_subcategoria', 'id_usuario', 'num_parcelas', 'parcela_atual'],
+                                properties: {
+                                    valor: {type: 'integer', example: 100},
+                                    descricao: {type: 'string', example: 'Compra de roupas'},
+                                    data_transacao: {type: 'string', example: '2023-03-23'},
+                                    data_vencimento: {type: 'string', example: '2023-03-23'},
+                                    tipo_transacao: {type: 'string', example: 'entrada'},
+                                    id_conta: {type: 'integer', example: 1},
+                                    id_categoria: {type: 'integer', example: 1},
+                                    id_subcategoria: {type: 'integer', example: 1},
+                                    id_usuario: {type: 'integer', example: 1},
+                                    num_parcelas: {type: 'integer', example: 1},
+                                    parcela_atual: {type: 'integer', example: 1},
+                                }
+                            }
+                        }
+                    }
+                },
+                responses: {
+                    '200': {
+                        description: 'transacao cadastrada com sucesso!'
+                    },
+                    '500': {
+                        description: 'Erro ao cadastrar transacao'
+                    }
+                }
+            },
+            
+        }
     }
 }
 

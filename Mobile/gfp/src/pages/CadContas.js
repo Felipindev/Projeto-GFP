@@ -11,6 +11,10 @@ export default function CadContas({navigation, route}) {
     const [inputSaldo, setInputSaldo] = useState('');
     const [inputContaPadrao, setInputContaPadrao] = useState(false);
     const [usuario, setUsuario] = useState({});
+    //tratamentos de erro:
+    const [erroNome, setErroNome] = useState('');
+    const [erroTipo, setErroTipo] = useState('');
+    const [erroSaldo, setErroSaldo] = useState('');
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -46,6 +50,26 @@ export default function CadContas({navigation, route}) {
     } 
 
     const botaoSalvar = async () => {
+        let erro = false;
+        setErroNome('');
+        setErroTipo('');
+        setErroSaldo('');
+
+    if (!inputNome){
+        setErroNome('Informe o nome da conta:');
+        erro = true;
+    }
+    if (!inputTipo){
+        setErroTipo('Informe o tipo da conta:');
+        erro = true;
+    }
+    if (!inputSaldo){
+        setErroSaldo('Informe o saldo da conta:');
+        erro = true;
+    }
+    if (erro) {
+        return;
+    }
     try {
         const dados = {
             nome: inputNome,
@@ -84,6 +108,8 @@ export default function CadContas({navigation, route}) {
             <View style={Estilos.conteudoCorpo}>
                 <Text style={styles.titulo}>Nova Conta</Text>
                 <Text style={styles.subtitulo}>clique no botão "Salvar" ou clique no ícone no canto superior direito para salvar a conta</Text>
+                {/* mensagem de erro */}
+                {erroNome ? <Text style={styles.erroMsg}>{erroNome}</Text> : null}
                 <View style={styles.formGroup}>
                     <MaterialIcons name="account-balance-wallet" size={24} color="#008080" style={styles.icon} />
                     <TextInput
@@ -94,6 +120,8 @@ export default function CadContas({navigation, route}) {
                         placeholderTextColor="#94a3b8"
                     />
                 </View>
+                
+                {erroTipo ? <Text style={styles.erroMsg}>{erroTipo}</Text> : null}
                 <View style={styles.formGroup}>
                     <MaterialIcons name="category" size={24} color="#008080" style={styles.icon} />
                     <TextInput
@@ -104,6 +132,8 @@ export default function CadContas({navigation, route}) {
                         placeholderTextColor="#94a3b8"
                     />
                 </View>
+                
+                {erroSaldo ? <Text style={styles.erroMsg}>{erroSaldo}</Text> : null}
                 <View style={styles.formGroup}>
                     <MaterialIcons name="attach-money" size={24} color="#008080" style={styles.icon} />
                     <TextInput
@@ -115,6 +145,7 @@ export default function CadContas({navigation, route}) {
                         placeholderTextColor="#94a3b8"
                     />
                 </View>
+                
                 <View style={styles.switchGroup}>
                     <Text style={styles.labelSwitch}>Conta Padrão</Text>
                     <Switch
@@ -207,5 +238,11 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         letterSpacing: 1,
+    },
+    erroMsg: {
+    color: '#e63946',
+    fontSize: 14,
+    marginBottom: 8,
+    marginLeft: 8,
     },
 })

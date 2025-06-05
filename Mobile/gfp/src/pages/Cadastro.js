@@ -24,11 +24,31 @@ export default function Cadastro({ navigation }) {
   const [tipoAcesso, setTipoAcesso] = useState("usuario");
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
+  const [erroNome, setErroNome] = useState("");
+  const [erroEmail, setErroEmail] = useState("");
+  const [erroSenha, setErroSenha] = useState("");
+
   const botaoCadastro = async () => {
+    let erro = false;
+    setErroNome("");
+    setErroEmail("");
+    setErroSenha("");
+
+    if (!nome) {
+      setErroNome("Preencha o nome");
+      erro = true;
+    }
+    if (!email) {
+      setErroEmail("Preencha o email");
+      erro = true;
+    }
+    if (!senha) {
+      setErroSenha("Preencha a senha");
+      erro = true;
+    }
+    if (erro) return;
+
     try {
-      if (nome === "" || email === "" || senha === "" || tipoAcesso === "") {
-        throw new Error("Preencha todos os campos");
-      }
       const resposta = await fetch(`${enderecoServidor}/usuarios`, {
         method: "POST",
         headers: {
@@ -67,6 +87,7 @@ export default function Cadastro({ navigation }) {
         <Text style={styles.subtitle}>
           Gerencie suas finanças de forma simples e eficiente
         </Text>
+        {erroNome ? <Text style={styles.erroMsg}>{erroNome}</Text> : null}
         <TextInput
           style={styles.input}
           placeholder="Nome"
@@ -74,6 +95,7 @@ export default function Cadastro({ navigation }) {
           onChangeText={setNome}
           value={nome}
         />
+        {erroEmail ? <Text style={styles.erroMsg}>{erroEmail}</Text> : null}
         <TextInput
           style={styles.input}
           placeholder="Email"
@@ -81,6 +103,7 @@ export default function Cadastro({ navigation }) {
           onChangeText={setEmail}
           value={email}
         />
+        {erroSenha ? <Text style={styles.erroMsg}>{erroSenha}</Text> : null}
         <View style={styles.senhaContainer}>
           <TextInput
             style={[styles.input, { flex: 1, marginBottom: 0 }]}
@@ -207,4 +230,10 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
   },
+  erroMsg: {
+    color: '#e63946',
+    fontSize: 14,
+    marginBottom: 8,
+    marginLeft: 8,
+},
 });
