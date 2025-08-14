@@ -1,44 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {UsuarioContext} from '../UsuarioContext'
 
 export default function Principal() {
-    const [usuario, setUsuario] = useState(null);
+    const {dadosUsuario, setDadosUsuario, carregando} = useContext(UsuarioContext)
+
+    const navigate = useNavigate()
 
     useEffect(() => {
-        // Tenta pegar do localStorage (lembrarUsuario ou usuario)
-        const lembrar = localStorage.getItem('UsuarioLogado');
-        if (lembrar) {
-            try {
-                const { usuario } = JSON.parse(lembrar);
-                setUsuario(usuario);
-                console.log("Usuário recuperado do localStorage:", usuario);
-            } catch (error) {
-                console.error("Erro ao ler lembrarUsuario do localStorage:", error);
-                setUsuario(null);
-            }
-        } else {
-            const usuarioLocal = localStorage.getItem('usuario');
-            if (usuarioLocal) {
-                try {
-                    setUsuario(JSON.parse(usuarioLocal));
-                } catch (error) {
-                    console.error("Erro ao ler usuário do localStorage:", error);
-                    setUsuario(null);
-                }
-            }
+       if (!dadosUsuario && !carregando){
+            navigate('/login')
         }
-    }, []);
+    }, [dadosUsuario, carregando, navigate]);
 
     return (
         <div style={styles.container}>
             <div style={styles.logoContainer}>
                 <h1 style={styles.Title}>
-                    Bem-vindo ao GFP{usuario && usuario ? `, ${usuario}` : ""}!
+                    Bem-vindo ao GFP {dadosUsuario?.nome}
                 </h1>
                 <button style={styles.buttonSair} onClick={() => {
                     localStorage.removeItem('token');
                     localStorage.removeItem('usuario');
                     localStorage.removeItem('lembrarUsuario');
-                    window.location.href = '/';
+                    setDadosUsuario(null)
+                    navigate('/login')
                 }}>Sair</button>
             </div>
             <div style={{ marginTop: '20px' }}>
@@ -65,7 +51,7 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         height: '100vh',
-        backgroundColor: '#f8f8f8',
+        background: 'linear-gradient(to bottom, #f2f2f2 0%, #41d3be 100%)',
         padding: '20px',
         margin: 'auto',
     },

@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
+import {UsuarioContext} from '../UsuarioContext'
 import { useNavigate } from 'react-router-dom'
 import { enderecoServidor } from '../utils';
 
 export default function Login() {
+    const {dadosUsuario, setDadosUsuario} = useContext(UsuarioContext)
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
@@ -31,6 +33,7 @@ export default function Login() {
     console.log(dados);
     localStorage.setItem('token', dados.token);
     localStorage.setItem('usuario', JSON.stringify(dados.usuario));
+    setDadosUsuario(dados) //gravando os dados do usuario no context
     if (lembrar) {
         localStorage.setItem('lembrarUsuario', JSON.stringify({
             token: dados.token,
@@ -58,11 +61,10 @@ export default function Login() {
         const { token, usuario } = JSON.parse(usuarioSalvo);
         localStorage.setItem('token', token);
         localStorage.setItem('usuario', JSON.stringify(usuario));
+        setDadosUsuario(dados)
         navigate('/principal');
     }
 }, [navigate]);
-
-
 
     return (
         <div style={styles.container}>

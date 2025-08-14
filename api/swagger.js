@@ -1161,10 +1161,10 @@ openapi: '3.0.4',
                     }
                 ], responses: {
                     '200': {
-                        description: 'Campo específico atualizado com sucesso!'
+                        description: 'dados atualizados com sucesso!'
                     },
                     '500': {
-                        description: 'Erro ao atualizar campo especifico'
+                        description: 'Erro ao atualizar dados'
                     }
                 }
             },
@@ -1301,6 +1301,106 @@ openapi: '3.0.4',
                     }
                 }
             },
+            get: {
+                tags: ['Transacoes'],
+                summary: 'Listar todas as transacoes',
+                description: 'Método utilizado para listar todas as transacoes cadastradas',
+                security: [
+                    {
+                        bearerAuth: [],
+                    }
+                ],
+                responses: {
+                    '200': {
+                        description: 'Lista de transacoes',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'array',
+                                    items: {
+                                        type: 'object',
+                                        properties: {
+                                            id_transacao: { type: 'integer', example: 1 },
+                                            valor: {type: 'integer', example: 100},
+                                            descricao: {type: 'string', example: 'Compra de roupas'},
+                                            data_transacao: {type: 'string', example: '2023-03-23'},
+                                            data_vencimento: {type: 'string', example: '2023-03-23'},
+                                            data_pagamento: {type: 'string', example: '2023-03-23'},
+                                            tipo_transacao: {type: 'string', example: 'entrada'},
+                                            num_parcelas: {type: 'integer', example: 1},
+                                            parcela_atual: {type: 'integer', example: 1},
+                                            nome_conta: {type: 'integer', example: 1},
+                                            nome_categoria: {type: 'integer', example: 1},
+                                            nome_subcategoria: {type: 'integer', example: 1},
+                                            nome_usuario: {type: 'integer', example: 1},
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    '500': {
+                        description: 'Erro interno do servidor'
+                    }
+                }
+
+            },
+            put: {
+                tags: ['Transacoes'],
+                summary: 'Atualizar transacao',
+                description: 'Rota para atualizar todos os campos de uma transacao',
+                security: [
+                    {
+                        bearerAuth: [],
+                    }
+                ],
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                required: ['valor', 'descricao', 'data_transacao', 'data_vencimento', 'data_pagamento', 'tipo_transacao', 'id_conta', 'id_categoria', 'id_subcategoria', 'id_usuario', 'num_parcelas', 'parcela_atual'],
+                                properties: {
+                                    valor: {type: 'integer', example: 100},
+                                    descricao: {type: 'string', example: 'Compra de roupas'},
+                                    data_transacao: {type: 'string', example: '2023-03-23'},
+                                    data_vencimento: {type: 'string', example: '2023-03-23'},
+                                    data_pagamento: {type: 'string', example: '2023-03-23'},
+                                    tipo_transacao: {type: 'string', example: 'entrada'},
+                                    num_parcelas: {type: 'integer', example: 1},
+                                    parcela_atual: {type: 'integer', example: 1},
+                                    id_conta: {type: 'integer', example: 1},
+                                    id_categoria: {type: 'integer', example: 1},
+                                    id_subcategoria: {type: 'integer', example: 1},
+                                    id_usuario: {type: 'integer', example: 1},
+                                }
+                            }
+                        }
+                    }
+                },
+                parameters: [
+                    {
+                        name: 'id_transacao',
+                        in: 'path',
+                        required: true,
+                        schema: {
+                            type: 'integer'
+                        }
+                    }
+                ], responses: {
+                    '200': {
+                        description: 'dados atualizados com sucesso!'
+                    },
+                    '404': {
+                        description: 'Not Found'
+                    },
+                    '500': {
+                        description: 'Erro ao atualizar dados'
+                    }
+                }
+            },
+
             
         }
     }
