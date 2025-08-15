@@ -29,17 +29,17 @@ export default function Contas ({navigation}) {
             console.error("Erro ao buscar dados da API:", error);
         }
     }
-
-    useEffect(() => {
-        buscarUsuarioLogado();
-    }, []);
-
     //executa quando a variavel usuario é carregada
     useEffect(() => {
         if (isFocused == true && usuario.token){
             buscarDadosAPI();
         }
     }, [usuario, isFocused])
+
+    useEffect(() => {
+        buscarUsuarioLogado();
+    }, []);
+
 
     const buscarUsuarioLogado = async () => {
         const usuarioLogado = await AsyncStorage.getItem('UsuarioLogado');
