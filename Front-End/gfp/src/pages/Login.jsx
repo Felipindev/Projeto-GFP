@@ -28,31 +28,31 @@ export default function Login() {
                     senha: senha,
                 }),
             })
-           if (resposta.ok) {
-    const dados = await resposta.json();
-    console.log(dados);
-    localStorage.setItem('token', dados.token);
-    localStorage.setItem('usuario', JSON.stringify(dados.usuario));
-    setDadosUsuario(dados) //gravando os dados do usuario no context
-    if (lembrar) {
-        localStorage.setItem('lembrarUsuario', JSON.stringify({
-            token: dados.token,
-            usuario: dados.nome
-        }));
-    } else {
-        localStorage.removeItem('lembrarUsuario');
-    }
-    navigate('/principal');
-} else {
-                const erro = await resposta.json();
-                alert(erro.message);
-                throw new Error(erro.message);
+            if (resposta.ok) {
+                const dados = await resposta.json();
+                console.log(dados);
+                localStorage.setItem('token', dados.token);
+                localStorage.setItem('usuario', JSON.stringify(dados.usuario));
+                setDadosUsuario(dados) //gravando os dados do usuario no context
+            if (lembrar) {
+                localStorage.setItem('lembrarUsuario', JSON.stringify({
+                    token: dados.token,
+                    usuario: dados.nome
+                }));
+            } else {
+                localStorage.removeItem('lembrarUsuario');
             }
-        } catch (error) {
-            console.error("Erro ao fazer login:", error);
-            alert(error.message);
-            return 
-        }
+            navigate('/principal');
+            } else {
+                        const erro = await resposta.json();
+                        alert(erro.message);
+                        throw new Error(erro.message);
+                    }
+                } catch (error) {
+                    console.error("Erro ao fazer login:", error);
+                    alert(error.message);
+                    return 
+                }
     }
 
     useEffect(() => {

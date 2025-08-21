@@ -3,6 +3,7 @@ import { useNavigate, Link, Routes, Route, useLocation } from 'react-router-dom'
 import {UsuarioContext} from '../UsuarioContext.jsx'
 import Dashboard from './Dashboard';
 import Contas from './Contas.jsx';
+import CadContas from './CadContas.jsx';
 import logo from '../assets/logo.png';
 import { MdAdd, MdClose, MdGridView, MdLogout, MdPeople, MdCached, MdCreditCard, MdOutlineLocalOffer, MdMenu} from 'react-icons/md';
 
@@ -24,7 +25,7 @@ export default function Principal() {
         try {
             localStorage.removeItem('UsuarioLogado');
             setDadosUsuario(null);
-            navigate('/');
+            navigate('/login');
         } catch (error) {
             console.error("Erro ao fazer logout:", error);
         }
@@ -105,7 +106,7 @@ export default function Principal() {
                             <p>{dadosUsuario?.email}</p>
                         </div>
                     </div>
-                    <button className='flex items-center gap-2 w-full justify-center p-3 rounded-lg duration-200 text-slate-300 font-bold' onClick={botaoLogout}>
+                    <button className='flex items-center gap-2 w-full justify-center p-3 rounded-lg duration-200 text-slate-300 font-bold hover:bg-slate-800' onClick={botaoLogout}>
                         <MdLogout className='w-8 h-8 p-2 bg-slate-700 text-red-500 rounded-full m-4'/>
                         <span className='md:hidden lg:block'>SAIR</span>
                     </button>
@@ -128,6 +129,7 @@ export default function Principal() {
                         <Route path='/' element={<Dashboard />} />
                         <Route path='/dashboard' element={<Dashboard />} />
                         <Route path='/contas' element={<Contas />} />
+                        <Route path='/cadcontas' element={<CadContas />} />
                     </Routes>
                 </main>
             </section>
