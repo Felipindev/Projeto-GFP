@@ -73,7 +73,7 @@ export default function Contas(){
         //função para exibir cada item da lista
         const exibirItemLista = (item) => {
             return(
-                <div key={item.id} className={Estilos.linhaListagem}>
+                <div key={item.id_conta} className={Estilos.linhaListagem}>
                     <div className='p-2 bg-cyan-100 text-cyan-600 rounded-full'>
                         {iconesTipoConta[item.tipo_conta]}
                     </div>
@@ -82,7 +82,7 @@ export default function Contas(){
                         <p className='text-sm text-gray-600'>{nomesTipoConta[item.tipo_conta]}</p>
                     </div>
                     <div className='flex items-center space-x-2'>
-                        <button className={Estilos.botaoAlterar}><MdEdit className='h7 w-7 text-green-800'/></button>
+                        <button className={Estilos.botaoAlterar} onClick={() => navigate('/cadcontas', { state: { itemAlterar : item } })}><MdEdit className='h7 w-7 text-green-800'/></button>
                         <button className={Estilos.botaoExcluir} onClick={() => botaoExcluir(item.id_conta)}><MdDelete className='h7 w-7 text-red-800'/></button>
                     </div>
                 </div>

@@ -28,16 +28,15 @@ export default function Login() {
                     senha: senha,
                 }),
             })
+            const dados = await resposta.json();
             if (resposta.ok) {
-                const dados = await resposta.json();
-                console.log(dados);
                 localStorage.setItem('token', dados.token);
                 localStorage.setItem('usuario', JSON.stringify(dados.usuario));
                 setDadosUsuario(dados) //gravando os dados do usuario no context
             if (lembrar) {
                 localStorage.setItem('lembrarUsuario', JSON.stringify({
                     token: dados.token,
-                    usuario: dados.nome
+                    usuario: dados.usuario
                 }));
             } else {
                 localStorage.removeItem('lembrarUsuario');
@@ -61,7 +60,7 @@ export default function Login() {
         const { token, usuario } = JSON.parse(usuarioSalvo);
         localStorage.setItem('token', token);
         localStorage.setItem('usuario', JSON.stringify(usuario));
-        setDadosUsuario(dados)
+        setDadosUsuario(usuario)  /////////// 
         navigate('/principal');
     }
 }, [navigate]);

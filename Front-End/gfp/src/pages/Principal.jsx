@@ -4,6 +4,7 @@ import {UsuarioContext} from '../UsuarioContext.jsx'
 import Dashboard from './Dashboard';
 import Contas from './Contas.jsx';
 import CadContas from './CadContas.jsx';
+import Categorias from './categorias.jsx';
 import logo from '../assets/logo.png';
 import { MdAdd, MdClose, MdGridView, MdLogout, MdPeople, MdCached, MdCreditCard, MdOutlineLocalOffer, MdMenu} from 'react-icons/md';
 
@@ -130,6 +131,7 @@ export default function Principal() {
                         <Route path='/dashboard' element={<Dashboard />} />
                         <Route path='/contas' element={<Contas />} />
                         <Route path='/cadcontas' element={<CadContas />} />
+                        <Route path='/categorias' element={<Categorias />} />
                     </Routes>
                 </main>
             </section>
