@@ -17,7 +17,7 @@ const Estilos = {
     labelCadastro: 'block mb-1 font-medium text-gray-700',
     inputCadastro: 'w-full border border-gray-700 shadow-lg px-4 py-2 rounded-lg focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200',
     botaoOutline: 'flex items-center gap-2 px-4 py-2 bg-red-500 text-white border border-gray-400 text-gray-700 rounded-lg hover:bg-red-600 transition-colors hover:text-white',
-    botao: 'flex items-center gap-2 px-4 py-2 border text-white bg-cyan-600 rounded-lg hover:bg-cyan-700 transition-colors'
+    botao: 'flex items-center gap-2 px-4 py-2 border text-white bg-cyan-600 rounded-lg hover:bg-cyan-700 transition-colors',
 
 }
 export default Estilos;
