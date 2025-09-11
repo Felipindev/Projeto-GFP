@@ -32,13 +32,10 @@ class RotasSubCategorias {
     static async listarPorID(req,res){
         const { id_subCategoria } = req.params;
         try {
-            const subcategoria = await BD.query(`SELECT sc. *, c.nome AS nome FROM subcategorias AS sc
-                    LEFT JOIN categorias c ON sc.id_categoria= c.id_categoria WHERE sc.id_subcategoria = $1
+            const subcategoria = await BD.query(`SELECT sc.*, sc.nome AS nome FROM subcategorias AS sc
+                    LEFT JOIN categorias c ON sc.id_categoria= c.id_categoria WHERE sc.id_categoria = $1 and sc.ativo = true
                 ORDER BY sc.id_subcategoria`, [id_subCategoria]);
-            if (subcategoria.rows.length === 0) {
-                return res.status(404).json({ error: "Subcategoria não encontrado" });
-            }
-            res.status(200).json(subcategoria.rows[0]);
+            res.status(200).json(subcategoria.rows);
         } catch (error) {
             console.error("Erro ao listar a subcategoria:", error);
             res.status(500).json({ error: "Erro ao listar a subcategoria" });
