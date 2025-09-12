@@ -1,15 +1,9 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { UsuarioContext } from "../UsuarioContext.jsx";
 import { enderecoServidor } from "../utils.jsx";
 import Estilos from "../styles/Estilos.jsx";
 import { IconesCategorias } from "../utils.jsx";
-import {
-  MdAdd,
-  MdChevronRight,
-  MdDelete,
-  MdEdit,
-  MdExpandMore,
-} from "react-icons/md";
+import { MdAdd, MdArrowForwardIos, MdDelete, MdEdit, MdExpandMore, } from "react-icons/md";
 import CategoriasModal from "./CategoriasModal.jsx";
 import SubCategoriasModal from "./SubCategoriasModal.jsx";
 
@@ -114,11 +108,11 @@ export default function Categorias() {
             </span>
           </div>
           <div className="flex items-center space-x-2">
-            {estaAberta ? (
+            {!estaAberta ? 
+              <MdArrowForwardIos className="h-7 w-7" />
+              : 
               <MdExpandMore className="w-7 h-7 text-gray-500" />
-            ) : (
-              <MdChevronRight className="h-7 w-7" />
-            )}
+            }
 
             <button
               className={Estilos.botaoAlterar}

@@ -4,17 +4,23 @@ import {UsuarioContext} from '../UsuarioContext.jsx'
 import Dashboard from './Dashboard';
 import Contas from './Contas.jsx';
 import CadContas from './CadContas.jsx';
-import Categorias from './categorias.jsx';
+import Categorias from './Categorias.jsx';
 import logo from '../assets/logo.png';
 import { MdAdd, MdClose, MdGridView, MdLogout, MdPeople, MdCached, MdCreditCard, MdOutlineLocalOffer, MdMenu} from 'react-icons/md';
+import TransacaoModal from './TransacaoModal.jsx';
 
 export default function Principal() {
     const {dadosUsuario, setDadosUsuario, carregando} = useContext(UsuarioContext)
 
     const [menuAberto, setMenuAberto] = useState(false)
+    const [modalTransacaoAberto, setModalTransacaoAberto] = useState(false)
 
     const navigate = useNavigate()
     const location = useLocation();
+
+    const fecharTransacaoModal = () => {
+        setModalTransacaoAberto(false)
+    }
 
     useEffect(() => {
        if (!dadosUsuario && !carregando){
@@ -43,9 +49,9 @@ export default function Principal() {
                     lg:w-64 md:translate-x-0 ${menuAberto == true ? 'translate-x-0' : '-translate-x-full'}`
             }>
                 <div className='flex justify-between items-center mb-6 p-4 border-b border-slate-700'>
-                    <div className='flex gap-2 items-center'>
+                    <div className='flex gap-2 items-center' >
                         <img src={logo} alt='Logo GFP' className='w-8 h-8' />
-                        <span className='text-xl font-bold md:hidden lg:block'>GFP</span>
+                        <span className='text-xl font-bold md:hidden lg:block' >GFP</span>
                     </div>
                     
                     <button className='md:hidden' onClick={() => setMenuAberto(false)}>
@@ -93,7 +99,7 @@ export default function Principal() {
                     </div>
                 </nav>
                 <div className='p-4 lg:p-6 border-t border-slate-700 gap-4 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 transition-colors duration-200 m-4 '>
-                    <button className='flex w-full items-center justify-center '>
+                    <button className='flex w-full items-center justify-center ' onClick={() => setModalTransacaoAberto(true)}>
                         <MdAdd className='w-8 h-8'/>
                         <span className='md:hidden lg:block '>Nova Transação</span>
                     </button>
@@ -135,6 +141,11 @@ export default function Principal() {
                     </Routes>
                 </main>
             </section>
+
+            <TransacaoModal 
+                modalAberto={modalTransacaoAberto}
+                fecharModal={fecharTransacaoModal}
+            />
         </div>
     )
 }

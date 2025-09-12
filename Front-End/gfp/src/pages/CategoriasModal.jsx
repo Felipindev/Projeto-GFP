@@ -143,7 +143,7 @@ export default function CategoriasModal({modalAberto, fecharModal, itemAlterar})
             placeholder="Ex: Gasto com alimentos"
           /> */}
 
-          <label className={Estilos.labelCadastro}>Escolha uma Cor</label>
+          <label className={Estilos.labelCadastro}>Escolha uma Cor:</label>
           <div className="flex items-center gap-3">
             {/* botão voltar */}
             <button 
@@ -179,7 +179,7 @@ export default function CategoriasModal({modalAberto, fecharModal, itemAlterar})
             </button>
           </div>
 
-          <label className={Estilos.labelCadastro}>Escolha um Icone</label>
+          <label className={Estilos.labelCadastro}>Escolha um Icone:</label>
           <div className="flex items-center gap-3">
             {/* botão voltar */}
             <button 
