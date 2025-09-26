@@ -59,6 +59,8 @@ class RotasTransacoes {
 
         lt.nome AS nome_conta,
         c.nome AS nome_categoria,
+        c.icone,
+        c.cor,
         sc.nome AS nome_subcategoria,
         u.nome AS nome_usuario
 

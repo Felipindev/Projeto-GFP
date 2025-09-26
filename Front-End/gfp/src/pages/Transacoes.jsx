@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext} from 'react'
 import { UsuarioContext } from '../UsuarioContext.jsx'
-import { enderecoServidor, nomesTipoConta, iconesTipoConta } from '../utils.jsx'
+import { enderecoServidor, nomesTipoConta, iconesTipoConta, IconesCategorias } from '../utils.jsx'
 import { MdAdd, MdEdit, MdDelete, MdCreditCard, MdAccountBalance, MdEmail, MdFeaturedPlayList, MdAttachMoney, MdAttachEmail, MdAutoGraph } from 'react-icons/md'
 import { useNavigate } from 'react-router-dom'
 import Estilos from "../styles/Estilos.jsx"
 
-export default function Contas(){
+export default function Transacoes(){
     const { dadosUsuario, setDadosUsuario, carregando } = useContext(UsuarioContext)
     const [dadosLista, setDadosLista] = useState([])
 
@@ -13,7 +13,7 @@ export default function Contas(){
 
     const buscarDadosAPI = async () => {
         try{
-            const resposta = await fetch(`${enderecoServidor}/contas`,{
+            const resposta = await fetch(`${enderecoServidor}/transacao`,{
                 method: 'GET',
                 headers:{
                     'Authorization': `Bearer ${dadosUsuario.token}`,
@@ -36,9 +36,9 @@ export default function Contas(){
         }, [dadosUsuario])
 
         const botaoExcluir = async (id) => {
-            if (!window.confirm("Tem certeza que deseja excluir esta conta?")) return;
+            if (!window.confirm("Tem certeza que deseja excluir esta transação?")) return;
             try{
-                const resposta = await fetch(`${enderecoServidor}/contas/${id}`,{
+                const resposta = await fetch(`${enderecoServidor}/transacao/${id}`,{
                     method: 'DELETE',
                     headers:{
                         'Authorization': `Bearer ${dadosUsuario.token}`,
@@ -56,17 +56,20 @@ export default function Contas(){
         //função para exibir cada item da lista
         const exibirItemLista = (item) => {
             return(
-                <div key={item.id_conta} className={Estilos.linhaListagem}>
-                    <div className='p-2 bg-cyan-100 text-cyan-600 rounded-full'>
-                        {iconesTipoConta[item.tipo_conta]}
+                <div key={item.id_transacao} className={Estilos.linhaListagem}>
+                    <div className={`text-white rounded-full p-2`} style={{backgroundColor: item.cor}}>
+                        {IconesCategorias[item.icone]}
                     </div>
-                    <div className='flex-1 ml-4'>
-                        <p className='font-bold text-gray-800'>{item.nome}</p>
-                        <p className='text-sm text-gray-600'>{nomesTipoConta[item.tipo_conta]}</p>
-                    </div>
-                    <div className='flex items-center space-x-2'>
-                        <button className={Estilos.botaoAlterar} onClick={() => navigate('/cadcontas', { state: { itemAlterar : item } })}><MdEdit className='h7 w-7 text-green-800'/></button>
-                        <button className={Estilos.botaoExcluir} onClick={() => botaoExcluir(item.id_conta)}><MdDelete className='h7 w-7 text-red-800'/></button>
+                    <div className='flex-1 p-2'>
+                        <p className='text-gray-800 font-semibold text-sm truncate'>{item.descricao}</p>
+                        <div className='flex justify-between items-center'>
+                            <div>
+                                <p className='text-sm text-gray-500 truncate'>{item.nome_subcategoria}</p>
+                                <div className='flex '>
+
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )
@@ -74,17 +77,10 @@ export default function Contas(){
 
     return(
         <div>  
-            <h1 className= 'text-3xl font-bold mb-6'>Contas</h1>
+            <h1 className= 'text-3xl font-bold mb-6'>transações</h1>
             <section className='bg-white p-4 rounded-lg shadow-md'>
-                <div className='flex justify-between items-center mb-4'>
-                    <h3 className='text-xl font-bold text-gray-800'>Lista de Contas</h3>
-                    <button className={Estilos.botaoCadastro}
-                            onClick={() => navigate("/cadcontas")}>
-                        <MdAdd className='w-8 h-8' />
-                        Adicionar Conta 
-                    </button>
-
-
+                <div className='flex justify-between items-center mb-4'>     
+                    {/* conteudo da busca de transcoes */}
                 </div>
 
                  {/* lista de contas cadastradas */}

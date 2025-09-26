@@ -5,6 +5,7 @@ import Dashboard from './Dashboard';
 import Contas from './Contas.jsx';
 import CadContas from './CadContas.jsx';
 import Categorias from './Categorias.jsx';
+import Transacoes from './Transacoes.jsx';
 import logo from '../assets/logo.png';
 import { MdAdd, MdClose, MdGridView, MdLogout, MdPeople, MdCached, MdCreditCard, MdOutlineLocalOffer, MdMenu} from 'react-icons/md';
 import TransacaoModal from './TransacaoModal.jsx';
@@ -138,6 +139,7 @@ export default function Principal() {
                         <Route path='/contas' element={<Contas />} />
                         <Route path='/cadcontas' element={<CadContas />} />
                         <Route path='/categorias' element={<Categorias />} />
+                        <Route path='/transacoes' element={<Transacoes />} />
                     </Routes>
                 </main>
             </section>
