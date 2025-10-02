@@ -1345,6 +1345,9 @@ openapi: '3.0.4',
                 }
 
             },
+            
+        },
+        '/transacao/{id_transacao}': {
             put: {
                 tags: ['Transacoes'],
                 summary: 'Atualizar transacao',
@@ -1400,12 +1403,171 @@ openapi: '3.0.4',
                     }
                 }
             },
-            
+            get: {
+                tags: ['Transacoes'],
+                summary: 'Listar transacao por ID',
+                description: 'Método utilizado para listar uma transacao pelo seu ID',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: 'id_transacao',
+                        in: 'path',
+                        required: true,
+                        schema: { type: 'integer' }
+                    }
+                ],
+                responses: {
+                    '200': {
+                        description: 'Transacao encontrada'
+                    },
+                    '404': {
+                        description: 'Transacao não encontrada'
+                    },
+                    '500': {
+                        description: 'Erro interno do servidor'
+                    }
+                }
+            },
+            patch: {
+                tags: ['Transacoes'],
+                summary: 'Atualizar campos específicos da transacao',
+                description: 'Rota para atualizar apenas alguns campos de uma transacao',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: 'id_transacao',
+                        in: 'path',
+                        required: true,
+                        schema: { type: 'integer' }
+                    }
+                ],
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    valor: { type: 'integer', example: 200 },
+                                    descricao: { type: 'string', example: 'Parcela de empréstimo' },
+                                    data_pagamento: { type: 'string', example: '2023-04-15' }
+                                }
+                            }
+                        }
+                    }
+                },
+                responses: {
+                    '200': {
+                        description: 'Transacao atualizada com sucesso!'
+                    },
+                    '404': {
+                        description: 'Transacao não encontrada'
+                    },
+                    '500': {
+                        description: 'Erro ao atualizar transacao'
+                    }
+                }
+            },
+            delete: {
+                tags: ['Transacoes'],
+                summary: 'Excluir (inativar) transacao',
+                description: 'Esta rota marca a transacao como inativa (não deleta do banco)',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: 'id_transacao',
+                        in: 'path',
+                        required: true,
+                        schema: { type: 'integer' }
+                    }
+                ],
+                responses: {
+                    '200': {
+                        description: 'Transacao inativada com sucesso!'
+                    },
+                    '404': {
+                        description: 'Transacao não encontrada'
+                    },
+                    '500': {
+                        description: 'Erro ao excluir transacao'
+                    }
+                }
+            },
+        },
+        '/transacao/transacoesVencidas/{id_usuario}': {
+            get: {
+                tags: ['Transacoes'],
+                summary: 'Listar transacoes vencidas',
+                description: 'Lista todas as transacoes que estão vencidas de um usuário específico',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: 'id_usuario',
+                        in: 'path',
+                        required: true,
+                        schema: { type: 'integer' }
+                    }
+                ],
+                responses: {
+                    '200': {
+                        description: 'Lista de transacoes vencidas'
+                    },
+                    '500': {
+                        description: 'Erro ao buscar transacoes vencidas'
+                    }
+                }
+            }
+        },
+        '/transacao/filtroData': {
+            get: {
+                tags: ['Transacoes'],
+                summary: 'Filtrar transacoes por data',
+                description: 'Permite buscar transacoes dentro de um intervalo de datas',
+                security: [{ bearerAuth: [] }],
+                parameters: [
+                    {
+                        name: 'dataInicio',
+                        in: 'query',
+                        required: true,
+                        schema: { type: 'string', example: '2023-01-01' }
+                    },
+                    {
+                        name: 'dataFim',
+                        in: 'query',
+                        required: true,
+                        schema: { type: 'string', example: '2023-01-31' }
+                    }
+                ],
+                responses: {
+                    '200': {
+                        description: 'Transacoes filtradas com sucesso'
+                    },
+                    '500': {
+                        description: 'Erro ao filtrar transacoes'
+                    }
+                }
+            }
+        },
+        '/transacao/somarTransacoes': {
+            get: {
+                tags: ['Transacoes'],
+                summary: 'Somar transacoes',
+                description: 'Retorna a soma dos valores de todas as transacoes',
+                security: [{ bearerAuth: [] }],
+                responses: {
+                    '200': {
+                        description: 'Soma calculada com sucesso'
+                    },
+                    '500': {
+                        description: 'Erro ao calcular soma das transacoes'
+                    }
+                }
+            }
+        }
 
-            
         }
     }
-}
+
 
 const options ={
     swaggerDefinition,

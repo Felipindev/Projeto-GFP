@@ -83,18 +83,14 @@ export default function Categorias() {
     return (
       <section key={item.id_categoria}>
         <div
-          className={Estilos.linhaListagem}
+          className="flex items-center bg-gradient-to-r from-white-100 via-purple-100 to-gray-100 shadow-lg rounded-xl p-4 mb-4 transition-transform hover:scale-101"
           onClick={() => exibirListagemSubcategorias(item.id_categoria)}
         >
-          {/* icones */}
-          <div
-            className="p-2 text-white rounded-full"
-            style={{ backgroundColor: item.cor }}
-          >
-            {IconesCategorias[item.icone]}
+          <div className="flex items-center justify-center w-14 h-14 rounded-full mr-4 shadow-md" style={{ backgroundColor: item.cor }}>
+            <span className="text-3xl">{IconesCategorias[item.icone]}</span>
           </div>
-          <div className="flex-1 ml-4">
-            <p className="font-bold text-gray-800 mb-2 ml-1">{item.nome}</p>
+          <div className="flex-1">
+            <p className="text-lg font-bold text-gray-800 mb-1">{item.nome}</p>
             <span
               className={
                 item.tipo_transacao === "SAIDA"
@@ -107,24 +103,25 @@ export default function Categorias() {
               {item.tipo_transacao}
             </span>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             {!estaAberta ? 
               <MdArrowForwardIos className="h-7 w-7" />
               : 
               <MdExpandMore className="w-7 h-7 text-gray-500" />
             }
-
             <button
-              className={Estilos.botaoAlterar}
-              onClick={() => botaoAlterar(item)}
+              title="Editar"
+              className="bg-white border border-gray-300 rounded-full p-2 hover:bg-blue-200 transition-colors"
+              onClick={e => {e.stopPropagation(); botaoAlterar(item);}}
             >
-              <MdEdit className="h7 w-7 text-green-800" />
+              <MdEdit className="text-blue-600 text-xl" />
             </button>
             <button
-              className={Estilos.botaoExcluir}
-              onClick={() => botaoExcluir(item.id_categoria)}
+              title="Excluir"
+              className="bg-white border border-gray-300 rounded-full p-2 hover:bg-red-200 transition-colors"
+              onClick={e => {e.stopPropagation(); botaoExcluir(item.id_categoria);}}
             >
-              <MdDelete className="h7 w-7 text-red-800" />
+              <MdDelete className="text-red-600 text-xl" />
             </button>
           </div>
         </div>
@@ -250,32 +247,31 @@ export default function Categorias() {
   };
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">Categorias</h1>
-      <section className="bg-white p-4 rounded-lg shadow-md">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-gray-800">
-            Lista de Categorias
-          </h3>
+    <div className="min-h-screen py-8 px-2 sm:px-8">
+      <h1 className="text-4xl font-extrabold text-center mb-10">Categorias</h1>
+      <section className="max-w-6xl mx-auto bg-white p-6 rounded-2xl shadow-2xl">
+        <div className="flex justify-between items-center mb-6">
           <button
-            className={Estilos.botaoCadastro}
+            className="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold px-5 py-2 rounded-xl flex items-center gap-2 shadow-md hover:scale-101 transition-transform"
             onClick={() => setModalAberto(true)}
           >
-            <MdAdd className="w-8 h-8" />
+            <MdAdd className="w-7 h-7" />
             Adicionar Categoria
           </button>
         </div>
-
-        {/* lista de categorias cadastradas */}
-        <section>{dadosLista.map((item) => exibirItemLista(item))}</section>
+        <section>
+          {dadosLista.length === 0 ? (
+            <p className="text-center text-gray-400 text-lg">Nenhuma categoria encontrada.</p>
+          ) : (
+            dadosLista.map((item) => exibirItemLista(item))
+          )}
+        </section>
       </section>
-
       <CategoriasModal
         modalAberto={modalAberto}
         fecharModal={fecharModal}
         itemAlterar={itemAlterar}
       />
-
       <SubCategoriasModal
         modalAberto={subcategoriaModalAberto}
         fecharModal={fecharModalSubcategoria}

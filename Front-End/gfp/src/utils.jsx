@@ -259,16 +259,17 @@ export const IconesCategorias = {
 export const iconesTipoConta = {
   'CONTA_CORRENTE': <MdAccountBalance className="w-6 h-6" />,
   'POUPANCA': <MdEmail className="w-6 h-6" />,
+  'CARTÃO_CREDITO': <MdCreditCard className="w-6 h-6" />,
   'CARTAO_CREDITO': <MdCreditCard className="w-6 h-6" />,
- ' CARTAO_DEBITO': <MdFeaturedPlayList className="w-6 h-6" />,
- ' DINHEIRO': <MdAttachMoney className="w-6 h-6" />,
+  'CARTAO_DEBITO': <MdFeaturedPlayList className="w-6 h-6" />,
+  'DINHEIRO': <MdAttachMoney className="w-6 h-6" />,
   'INVESTIMENTO': <MdAutoGraph className="w-6 h-6" />,
 };
 export const nomesTipoConta = {
   'CONTA_CORRENTE': "Conta Corrente",
   'POUPANCA': "Poupança",
   'CARTAO_CREDITO': "Cartão de Crédito",
- ' CARTAO_DEBITO': "Cartão de Débito",
- ' DINHEIRO': "Dinheiro",
+  'CARTAO_DEBITO': "Cartão de Débito",
+  'DINHEIRO': "Dinheiro",
   'INVESTIMENTO': "Investimento",
 };
