@@ -103,6 +103,7 @@ export default function Categorias() {
               {item.tipo_transacao}
             </span>
           </div>
+          {/* <span className="text-black">Clique para ver mais</span>  */}
           <div className="flex items-center gap-2">
             {!estaAberta ? 
               <MdArrowForwardIos className="h-7 w-7" />

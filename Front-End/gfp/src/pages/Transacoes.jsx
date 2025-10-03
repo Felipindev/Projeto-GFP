@@ -1,15 +1,22 @@
 import React, { useState, useEffect, useContext} from 'react'
 import { UsuarioContext } from '../UsuarioContext.jsx'
 import { enderecoServidor, nomesTipoConta, iconesTipoConta, IconesCategorias } from '../utils.jsx'
-import { MdAdd, MdDelete, MdAccountBalance, MdEmail, MdFeaturedPlayList, MdAttachMoney, MdAttachEmail, MdAutoGraph, MdDone, MdCheckCircle, MdError, MdAccessTime } from 'react-icons/md'
-import { useNavigate } from 'react-router-dom'
+import { MdAdd, MdDelete, MdSearch, MdAccountBalance, MdEmail, MdFeaturedPlayList, MdAttachMoney, MdAttachEmail, MdAutoGraph, MdDone, MdCheckCircle, MdError, MdAccessTime } from 'react-icons/md'
+// import { useNavigate } from 'react-router-dom'
 import Estilos from "../styles/Estilos.jsx"
 
 export default function Transacoes(){
     const { dadosUsuario, setDadosUsuario, carregando } = useContext(UsuarioContext)
     const [dadosLista, setDadosLista] = useState([])
 
-    const navigate = useNavigate()
+    //guardadno os dados do filtro
+    const [pesquisa, setPesquisa] = useState('');
+    const [filtro, setFiltro] = useState({
+        tipo: 'todos',
+        status: 'todos'
+    });
+
+    // const navigate = useNavigate()
 
     const buscarDadosAPI = async () => {
         try{
@@ -157,15 +164,74 @@ export default function Transacoes(){
     return(
         <div className="min-h-screen py-5 px-2 sm:px-8">
             <h1 className="text-4xl font-extrabold text-center mb-10 ">Transações</h1>
-            <section className="max-w-6xl mx-auto bg-white p-6 rounded-2xl shadow-2xl">
-                <div className="flex justify-between items-center mb-6">
+            <section className="max-w-6xl mx-auto bg-white p-6 rounded-2xl shadow-2xl text-gray-800">
+                <div className="flex mb-3 gap-2 flex-wrap ">
                     {/* Filtro, busca ou botão de adicionar transação futuramente */}
+                    <div className='flex-1 min-w-48 '>
+                        <label>Busca: </label>
+                        <div className='relative'>
+                            <MdSearch className='absolute top-3 left-3 text-gray-400 w-5 h-5'/>
+                            <input type='text' placeholder='buscar transação...'
+                                className={`${Estilos.inputCadastro} pl-9`}
+                                value={pesquisa}
+                                onChange={(e) => setPesquisa(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    {/* seleção de período*/}
+                    <div className='flex-1 min-w-48'>
+                        <label>Período: </label>
+                        <select className={`${Estilos.inputCadastro}`}>
+                            <option value='esteMes'>Este Mês</option>
+                            <option value='mesPassado'>Mês Passado</option>
+                            <option value='ultimos7'>Últimos 7 dias</option>
+                            <option value='ultimos30'>Últimos 30 dias</option>
+                            <option value='todos'>Todos</option>
+                        </select>
+                    </div>
+
+                    {/* seleção de tipo*/}
+                    <div className='flex-1 min-w-48'>
+                        <label>Tipo: </label>
+                        <select className={`${Estilos.inputCadastro}`}
+                            value={filtro.tipo}
+                            onChange={(e) => setFiltro({...filtro, tipo: e.target.value})}
+                        >
+                            <option value='todos'>Todos</option>
+                            <option value='ENTRADA'>Entrada</option>
+                            <option value='SAIDA'>Saída</option>
+                        </select>
+                    </div>
+
+                    {/* seleção de status*/}
+                    <div className='flex-1 min-w-48'>
+                        <label>Status: </label>
+                        <select className={`${Estilos.inputCadastro}`}
+                            value={filtro.status}
+                            onChange={(e) => setFiltro({...filtro, status: e.target.value})}
+                        >
+                            <option value='todos'>Todos</option>
+                            <option value='aberto'>Aberto</option>
+                            <option value='vencidos'>Vencidos</option>
+                            <option value='pagos'>Pagos</option>
+                        </select>
+                    </div>
                 </div>
+
                 <section>
                     {dadosLista.length === 0 ? (
                         <p className="text-center text-gray-400 text-lg">Nenhuma transação encontrada.</p>
                     ) : (
-                        dadosLista.map(item => exibirItemLista(item))
+                        dadosLista
+                        .filter(item => item.descricao.toLowerCase().includes(pesquisa.toLowerCase()))
+                        .filter(item => filtro.tipo == 'todos' ? true : item.tipo_transacao == filtro.tipo)
+                        .filter(item => filtro.status == 'todos' || 
+                            (filtro.status == 'pagos' && item.data_pagamento != null) ||
+                            (filtro.status == 'aberto' && item.data_pagamento == null && new Date(item.data_vencimento) >= new Date()) ||
+                            (filtro.status == 'vencidos' && item.data_pagamento == null && new Date(item.data_vencimento) < new Date())
+                        )
+                        .map(item => exibirItemLista(item))
                     )}
                 </section>
             </section>
