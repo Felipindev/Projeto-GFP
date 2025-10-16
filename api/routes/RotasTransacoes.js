@@ -45,6 +45,13 @@ class RotasTransacoes {
   }
   static async listar(req, res) {
     try {
+      //Obtendo os parâmetros de consulta (query parameters)
+        const {dataInicio, dataFim} = req.query;
+        //const dataInicio = req.query.dataInicio;
+        //const dataFim = req.query.dataFim;
+
+
+
       const transacoes = await BD.query(`
     SELECT 
         t.id_transacao,
@@ -68,7 +75,9 @@ class RotasTransacoes {
         LEFT JOIN contas lt ON t.id_conta = lt.id_conta
         LEFT JOIN categorias c ON t.id_categoria = c.id_categoria
         LEFT JOIN subcategorias sc ON t.id_subcategoria = sc.id_subcategoria
-        JOIN usuarios u ON t.id_usuario = u.id_usuario`);
+        JOIN usuarios u ON t.id_usuario = u.id_usuario
+        WHERE t.data_vencimento BETWEEN $1 AND $2
+        ORDER BY t.data_vencimento`, [dataInicio, dataFim]);
         res.status(200).json(transacoes.rows);
     } catch (error) {
       console.error("Erro ao listar as transações:", error);
@@ -79,6 +88,8 @@ class RotasTransacoes {
   static async listarPorID(req,res){
     const { id_transacao } = req.params;
     try {
+
+
         const transacao = await BD.query(`SELECT 
         t.id_transacao,
         t.valor,

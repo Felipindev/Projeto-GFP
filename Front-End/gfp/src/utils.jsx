@@ -273,3 +273,42 @@ export const nomesTipoConta = {
   'DINHEIRO': "Dinheiro",
   'INVESTIMENTO': "Investimento",
 };
+
+
+export const calcularDatasPeriodo = (periodo) => {
+  const hoje = new Date(); //obtendo a data atual
+  let dataInicio = new Date();
+  let dataFim = new Date();
+
+  switch (periodo) {
+    case "esteMes": //de 1º ao último dia do mês atual
+      dataInicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+      dataFim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+      break;  
+
+    case "mesPassado": //de 1º ao último dia do mês passado
+      dataInicio = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
+      dataFim = new Date(hoje.getFullYear(), hoje.getMonth(), 0);
+      break;
+    
+      case "ultimos7": //últimos 7 dias
+      dataInicio.setDate(hoje.getDate() - 6);
+      dataFim = hoje;
+      break;
+
+    case "ultimos30": //últimos 30 dias
+      dataInicio.setDate(hoje.getDate() - 29);
+      dataFim = hoje;
+      break;
+
+    case "todos": //todas as datas
+      dataInicio = new Date(2000, 1, 1);
+      dataFim = new Date(2100, 12, 31);
+      break;
+  }
+
+  dataInicio = dataInicio.toISOString().split("T")[0];
+  dataFim = dataFim.toISOString().split("T")[0];
+
+  return { dataInicio, dataFim };
+}
