@@ -1,5 +1,17 @@
 import React, { useState, useEffect, useContext } from "react";
 import CardIndicador from "../components/CardIndicador.jsx";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  YAxis,
+  Bar,
+  XAxis,
+  BarChart,
+} from "recharts";
 import { UsuarioContext } from "../UsuarioContext.jsx";
 import {
   enderecoServidor,
@@ -7,6 +19,9 @@ import {
   iconesTipoConta,
   IconesCategorias,
   calcularDatasPeriodo,
+  listaCores,
+  CORES_GRAFICO,
+  formatarDinheiro,
 } from "../utils.jsx";
 import {
   MdAdd,
@@ -34,6 +49,50 @@ export default function Dashboard() {
   const { dadosUsuario } = useContext(UsuarioContext);
   const [filtro, setFiltro] = useState({ periodo: "esteMes" });
   const [carregando, setCarregando] = useState(true);
+  const [dadosDashboard, setDadosDashboard] = useState({
+    kpis: {despesas: 0, receitas: 0},
+    categorias: [],
+    subcategorias: [],
+    vencimento: []
+  });
+
+  const buscarDadosAPI = async () => {
+    try {
+      //calcular as datas de início e fim do período selecionado
+      const { dataInicio, dataFim } = calcularDatasPeriodo(filtro.periodo);
+
+      //usa o urlsearchparams para montar a query string de forma segura
+      const parametros = new URLSearchParams();
+
+      parametros.append("dataInicio", dataInicio);
+      parametros.append("dataFim", dataFim);
+
+      setCarregando(true);
+
+      const resposta = await fetch(
+        `${enderecoServidor}/transacoes/dadosDashboard?${parametros.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${dadosUsuario.token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const dados = await resposta.json();
+      setDadosDashboard(dados);
+      console.log("Dados recebidos:", dados);
+    } catch (error) {
+      console.error("Erro ao buscar dados da API:", error);
+    }
+  };
+
+  //executa quando a variavel usuario é carregada
+  useEffect(() => {
+    if (!carregando || dadosUsuario) {
+      buscarDadosAPI();
+    }
+  }, [dadosUsuario, filtro.periodo]);
 
   return (
     <div>
@@ -44,32 +103,146 @@ export default function Dashboard() {
           <p className="text-gray-200">Resumo de suas finanças</p>
         </div>
         <div className="flex items-center gap-3">
-            <div>
-          <select
-            className={`${Estilos.inputCadastro}`}
-            value={filtro.periodo}
-            onChange={(e) => setFiltro({ ...filtro, periodo: e.target.value })}
-          >
-            <option value="esteMes" className="text-gray-800 bg-transparent">Este Mês</option>
-            <option value="mesPassado" className="text-gray-800 bg-transparent">Mês Passado</option>
-            <option value="ultimos7" className="text-gray-800 bg-transparent">Últimos 7 dias</option>
-            <option value="ultimos30" className="text-gray-800 bg-transparent">Últimos 30 dias</option>
-            <option value="todos" className="text-gray-800 bg-transparent">Todos</option>
-          </select>
+          <div>
+            <select
+              className={`${Estilos.inputCadastro}`}
+              value={filtro.periodo}
+              onChange={(e) =>
+                setFiltro({ ...filtro, periodo: e.target.value })
+              }
+            >
+              <option value="esteMes" className="text-gray-800 bg-transparent">
+                Este Mês
+              </option>
+              <option
+                value="mesPassado"
+                className="text-gray-800 bg-transparent"
+              >
+                Mês Passado
+              </option>
+              <option value="ultimos7" className="text-gray-800 bg-transparent">
+                Últimos 7 dias
+              </option>
+              <option
+                value="ultimos30"
+                className="text-gray-800 bg-transparent"
+              >
+                Últimos 30 dias
+              </option>
+              <option value="todos" className="text-gray-800 bg-transparent">
+                Todos
+              </option>
+            </select>
           </div>
-            <button className='flex items-center gap-2 p-3 rounded-lg bg-gradient-to-r from-blue-700 to bg-blue-800 hover:bg-blue-900 font-semibold text-white shadow-md transition-colors duration-300'>
-                <MdAutoAwesome className="h-6 w-6" />
-                Análise com IA
-            </button>
+          <button className="flex items-center gap-2 p-3 rounded-lg bg-gradient-to-r from-blue-700 to bg-blue-800 hover:bg-blue-900 font-semibold text-white shadow-md transition-colors duration-300">
+            <MdAutoAwesome className="h-6 w-6" />
+            Análise com IA
+          </button>
         </div>
-
       </section>
 
       {/* seção 1: CARDS DE INDICADORES OU OS KPIS */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <CardIndicador cor={'#10b981'} titulo={'total de receitas'} icone={<MdTrendingUp className="h-9 w-9"/>} valor={222}/>
-        <CardIndicador cor={'#f21'} titulo={'total de despesas'} icone={<MdTrendingDown className="h-9 w-9"/>} valor={222}/>
-        <CardIndicador cor={'#4bf'} titulo={'saldo do período'} icone={<MdWallet className="h-9 w-9"/>} valor={222}/>
+        <CardIndicador
+          cor={"#10b981"}
+          titulo={"total de receitas"}
+          icone={<MdTrendingUp className="h-9 w-9" />}
+          valor={formatarDinheiro(dadosDashboard.kpis.receitas)}
+        />
+        <CardIndicador
+          cor={"#f21"}
+          titulo={"total de despesas"}
+          icone={<MdTrendingDown className="h-9 w-9" />}
+          valor={formatarDinheiro(dadosDashboard.kpis.despesas)}
+        />
+        <CardIndicador
+          cor={"#4bf"}
+          titulo={"saldo do período"}
+          icone={<MdWallet className="h-9 w-9" />}
+          valor={formatarDinheiro(dadosDashboard.kpis.receitas - dadosDashboard.kpis.despesas)}
+        />
+      </section>
+
+      {/* seção 2: GRÁFICOS DE ANÁLISE */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        {/* graficos catwgorias */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-xl font-bold mb-4 text-gray-800 text-center">
+            Despesas por categoria
+          </h3>
+          {dadosDashboard.categorias.length == 0 ? (
+            <p className="text-gray-600 text-center">
+              Nenhuma despesa registrada no período.
+            </p>
+          ) : (
+            <ResponsiveContainer width="100%" height={330}>
+              <PieChart>
+                <Pie
+                  data={dadosDashboard.categorias}
+                  dataKey={"valor"}
+                  nameKey="nome"
+                  outerRadius={120}
+                  fill={listaCores[25]}
+                  label={(item) => item.valor}
+                >
+                  {dadosDashboard.categorias.map((item, index) => (
+                    <Cell
+                      key={index}
+                      fill={CORES_GRAFICO[index % CORES_GRAFICO.length]}
+                    />
+                  ))}
+                  <Tooltip />
+                  <Legend verticalAlign="bottom" height={36} />
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        {/* gráfico subcategorias */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-xl font-bold mb-4 text-gray-800 text-center">
+            Despesas por Subcategorias
+          </h3>
+          {dadosDashboard.subcategorias.length == 0 ? (
+            <p className="text-gray-600 text-center">
+              Nenhuma despesa registrada no período.
+            </p>
+          ) : (
+            <ResponsiveContainer width="100%" height={330}>
+              <PieChart>
+                <Pie
+                  data={dadosDashboard.subcategorias}
+                  dataKey={"valor"}
+                  nameKey="nome"
+                  outerRadius={120}
+                  fill={listaCores[25]}
+                  label={(item) => item.valor}
+                >
+                  {dadosDashboard.subcategorias.map((item, index) => (
+                    <Cell
+                      key={index}
+                      fill={CORES_GRAFICO[index % CORES_GRAFICO.length]}
+                    />
+                  ))}
+                  <Tooltip />
+                  <Legend verticalAlign="bottom" height={36} />
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </section>
+
+      {/* seção 3: listas */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        {/* graficos catwgorias */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-xl font-bold mb-4 text-gray-800 text-center">
+            Próximos vencimentos
+          </h3>
+          <div className="space-y-3"></div>
+        </div>
       </section>
     </div>
   );

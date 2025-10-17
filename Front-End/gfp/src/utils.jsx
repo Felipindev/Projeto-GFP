@@ -66,6 +66,18 @@ import {
 
 export const enderecoServidor = "http://localhost:3000";
 
+export const CORES_GRAFICO = [
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#A020F0",
+  "#FF1493",
+  "#41d3be",
+  "#008080",
+  "#e63946",
+];
+
 export const listaCores = [
   "#000",
   "#111",
@@ -273,6 +285,11 @@ export const nomesTipoConta = {
   'DINHEIRO': "Dinheiro",
   'INVESTIMENTO': "Investimento",
 };
+
+export const formatarDinheiro = (valor) => {
+  valor = Number(valor)
+  return valor.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'})
+}
 
 
 export const calcularDatasPeriodo = (periodo) => {

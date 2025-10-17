@@ -62,6 +62,7 @@ app.delete('/contas/:id_conta', autenticarToken, RotasContas.deletar) //deletar 
 app.get('/transacao/transacoesVencidas/:id_usuario' , autenticarToken, RotasTransacoes.transacoesVencidas)
 app.get('/transacao/somarTransacoes', autenticarToken, RotasTransacoes.somarTransacoes)
 app.get('/transacao/filtroData', autenticarToken, RotasTransacoes.filtrarPorData); //filtrar transacoes por tipo de transacao
+app.get('/transacoes/dadosDashboard', RotasTransacoes.dadosDashboard); //resumo mensal de transacoes
 app.post('/transacao', autenticarToken, RotasTransacoes.nova); //criar uma nova transacao
 app.get('/transacao', autenticarToken, RotasTransacoes.listar); //listar todas as transacoes
 app.get('/transacao/:id_transacao', autenticarToken, RotasTransacoes.listarPorID); //listar uma transacao por id

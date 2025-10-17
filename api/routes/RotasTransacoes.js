@@ -46,13 +46,12 @@ class RotasTransacoes {
   static async listar(req, res) {
     try {
       //Obtendo os parâmetros de consulta (query parameters)
-        const {dataInicio, dataFim} = req.query;
-        //const dataInicio = req.query.dataInicio;
-        //const dataFim = req.query.dataFim;
+      const { dataInicio, dataFim } = req.query;
+      //const dataInicio = req.query.dataInicio;
+      //const dataFim = req.query.dataFim;
 
-
-
-      const transacoes = await BD.query(`
+      const transacoes = await BD.query(
+        `
     SELECT 
         t.id_transacao,
         t.valor,
@@ -77,20 +76,21 @@ class RotasTransacoes {
         LEFT JOIN subcategorias sc ON t.id_subcategoria = sc.id_subcategoria
         JOIN usuarios u ON t.id_usuario = u.id_usuario
         WHERE t.data_vencimento BETWEEN $1 AND $2
-        ORDER BY t.data_vencimento`, [dataInicio, dataFim]);
-        res.status(200).json(transacoes.rows);
+        ORDER BY t.data_vencimento`,
+        [dataInicio, dataFim]
+      );
+      res.status(200).json(transacoes.rows);
     } catch (error) {
       console.error("Erro ao listar as transações:", error);
       res.status(500).json({ error: "Erro ao listar as transações" });
     }
   }
 
-  static async listarPorID(req,res){
+  static async listarPorID(req, res) {
     const { id_transacao } = req.params;
     try {
-
-
-        const transacao = await BD.query(`SELECT 
+      const transacao = await BD.query(
+        `SELECT 
         t.id_transacao,
         t.valor,
         t.descricao,
@@ -112,19 +112,92 @@ class RotasTransacoes {
         LEFT JOIN subcategorias sc ON t.id_subcategoria = sc.id_subcategoria
         JOIN usuarios u ON t.id_usuario = u.id_usuario
         WHERE id_transacao = $1
-        ORDER BY t.id_transacao ASC` , [id_transacao]);
+        ORDER BY t.id_transacao ASC`,
+        [id_transacao]
+      );
 
-        if (transacao.rows.length === 0) {
-            return res.status(404).json({ error: "Transação não encontrada" });
-        }
-        res.status(200).json(transacao.rows[0]);
+      if (transacao.rows.length === 0) {
+        return res.status(404).json({ error: "Transação não encontrada" });
+      }
+      res.status(200).json(transacao.rows[0]);
     } catch (error) {
-        console.error("Erro ao listar a transação:", error);
-        res.status(500).json({ error: "Erro ao listar a transação" });
+      console.error("Erro ao listar a transação:", error);
+      res.status(500).json({ error: "Erro ao listar a transação" });
     }
   }
 
-  static async atualizarTodos(req,res) {
+  static async dadosDashboard(req, res) {
+    try {
+      const { dataInicio, dataFim } = req.query;
+
+      //query para os indicadores
+      const kpisQuery = `
+        SELECT 
+          COALESCE(SUM(CASE WHEN tipo_transacao = 'ENTRADA' THEN valor ELSE 0 END), 0) AS receitas,
+          COALESCE(SUM(CASE WHEN tipo_transacao = 'SAIDA' THEN valor ELSE 0 END), 0) AS despesas
+          FROM transacoes
+          WHERE data_vencimento BETWEEN $1 AND $2 
+      `;
+
+      //query para o grafico de categorias
+      const categoriasQuery = `
+        SELECT c.nome, SUM(t.valor)::float as valor
+        FROM transacoes t
+        INNER JOIN categorias c ON t.id_categoria = c.id_categoria
+        WHERE t.data_vencimento BETWEEN $1 AND $2
+        GROUP BY c.nome
+        ORDER BY valor DESC
+      `;
+      //query para o grafico de subcategorias
+      const subcategoriasQuery = `
+        SELECT s.nome, SUM(t.valor)::float as valor
+        FROM transacoes t
+        INNER JOIN subcategorias s ON t.id_subcategoria = s.id_subcategoria
+        WHERE t.data_vencimento BETWEEN $1 AND $2
+        GROUP BY s.nome
+        ORDER BY valor DESC
+      `;
+
+      //query para listar ulitmos vencimentos
+      const vencimentoQuery = `
+    SELECT 
+        t.valor::float,
+        t.descricao,
+        t.data_vencimento,
+
+        c.icone,
+        c.cor,
+
+        sc.nome AS nome_subcategoria
+
+        FROM transacoes t
+        JOIN categorias c ON t.id_categoria = c.id_categoria
+        JOIN subcategorias sc ON t.id_subcategoria = sc.id_subcategoria
+        WHERE t.data_vencimento BETWEEN $1 AND $2 AND t.data_pagamento IS NULL
+        ORDER BY t.data_vencimento`;
+
+      //executando todas as querys em paralelo para otimizar
+      const [kpis, categorias, subcategorias, vencimentos] = await Promise.all([
+        BD.query(kpisQuery, [dataInicio, dataFim]),
+        BD.query(categoriasQuery, [dataInicio, dataFim]),
+        BD.query(subcategoriasQuery, [dataInicio, dataFim]),
+        BD.query(vencimentoQuery, [dataInicio, dataFim])
+      ])
+
+      res.status(200).json({
+        kpis: kpis.rows[0],
+        categorias: categorias.rows,
+        subcategorias: subcategorias.rows,
+        vencimentos: vencimentos.rows,
+      })
+
+    } catch (error) {
+      console.error("Erro ao listar dados:", error);
+      res.status(500).json({ error: "Erro ao listar dados" });
+    }
+  }
+
+  static async atualizarTodos(req, res) {
     const { id_transacao } = req.params;
     const {
       valor,
@@ -165,192 +238,197 @@ class RotasTransacoes {
         return res.status(404).json({ error: "Transação não encontrada" });
       }
       res.status(200).json("Transação atualizada com sucesso!");
+    } catch (error) {
+      console.error("Erro ao atualizar a transação:", error);
+      res.status(500).json({ error: "Erro ao atualizar a transação" });
     }
-      catch(error){
-        console.error("Erro ao atualizar a transação:", error);
-        res.status(500).json({ error: "Erro ao atualizar a transação" });
+  }
+
+  static async atualizar(req, res) {
+    const { id_transacao } = req.params;
+    const {
+      valor,
+      descricao,
+      data_transacao,
+      data_vencimento,
+      data_pagamento,
+      tipo_transacao,
+      id_conta,
+      id_categoria,
+      id_subcategoria,
+      id_usuario,
+      num_parcelas,
+      parcela_atual,
+    } = req.body;
+
+    try {
+      const campos = [];
+      const valores = [];
+
+      if (valor !== undefined) {
+        campos.push(`valor = $${valores.length + 1}`);
+        valores.push(valor);
       }
+
+      if (descricao !== undefined) {
+        campos.push(`descricao = $${valores.length + 1}`);
+        valores.push(descricao);
+      }
+
+      if (data_transacao !== undefined) {
+        campos.push(`data_transacao = $${valores.length + 1}`);
+        valores.push(data_transacao);
+      }
+
+      if (data_vencimento !== undefined) {
+        campos.push(`data_vencimento = $${valores.length + 1}`);
+        valores.push(data_vencimento);
+      }
+
+      if (data_pagamento !== undefined) {
+        campos.push(`data_pagamento = $${valores.length + 1}`);
+        valores.push(data_pagamento);
+      }
+
+      if (tipo_transacao !== undefined) {
+        campos.push(`tipo_transacao = $${valores.length + 1}`);
+        valores.push(tipo_transacao);
+      }
+
+      if (id_conta !== undefined) {
+        campos.push(`id_conta = $${valores.length + 1}`);
+        valores.push(id_conta);
+      }
+
+      if (id_categoria !== undefined) {
+        campos.push(`id_categoria = $${valores.length + 1}`);
+        valores.push(id_categoria);
+      }
+
+      if (id_subcategoria !== undefined) {
+        campos.push(`id_subcategoria = $${valores.length + 1}`);
+        valores.push(id_subcategoria);
+      }
+
+      if (id_usuario !== undefined) {
+        campos.push(`id_usuario = $${valores.length + 1}`);
+        valores.push(id_usuario);
+      }
+
+      if (num_parcelas !== undefined) {
+        campos.push(`num_parcelas = $${valores.length + 1}`);
+        valores.push(num_parcelas);
+      }
+
+      if (parcela_atual !== undefined) {
+        campos.push(`parcela_atual = $${valores.length + 1}`);
+        valores.push(parcela_atual);
+      }
+
+      if (campos.length === 0) {
+        return res.status(400).json({ error: "Nenhum campo para atualizar" });
+      }
+      const query = `UPDATE transacoes SET ${campos.join(
+        ", "
+      )} WHERE id_transacao = ${id_transacao} RETURNING *`;
+      const transacao = await BD.query(query, valores);
+
+      if (transacao.rows.length === 0) {
+        return res.status(404).json({ error: "Transação não encontrada" });
+      }
+
+      res.status(200).json("Transação atualizada com sucesso!");
+    } catch (error) {
+      console.error("Erro ao atualizar a transação:", error);
+      res.status(500).json({ error: "Erro ao atualizar a transação" });
     }
+  }
 
-    static async atualizar(req,res){
-        const { id_transacao } = req.params;
-        const {
-            valor,
-            descricao,
-            data_transacao,
-            data_vencimento,
-            data_pagamento,
-            tipo_transacao,
-            id_conta,
-            id_categoria,
-            id_subcategoria,
-            id_usuario,
-            num_parcelas,
-            parcela_atual,
-          } = req.body;
+  static async deletar(req, res) {
+    const { id_transacao } = req.params;
 
-        try {
-            const campos = [];
-            const valores = [];
-
-            if (valor !== undefined) {
-                campos.push(`valor = $${valores.length + 1}`)
-                valores.push(valor);
-            }
-
-            if (descricao !== undefined) {
-                campos.push(`descricao = $${valores.length + 1}`)
-                valores.push(descricao);
-            }
-
-            if (data_transacao !== undefined) {
-                campos.push(`data_transacao = $${valores.length + 1}`)
-                valores.push(data_transacao);
-            }
-
-            if (data_vencimento !== undefined) {
-                campos.push(`data_vencimento = $${valores.length + 1}`)
-                valores.push(data_vencimento);
-            }
-
-            if (data_pagamento !== undefined) {
-                campos.push(`data_pagamento = $${valores.length + 1}`)
-                valores.push(data_pagamento);
-            }
-
-            if (tipo_transacao !== undefined) {
-                campos.push(`tipo_transacao = $${valores.length + 1}`)
-                valores.push(tipo_transacao);
-            }
-
-            if (id_conta !== undefined) {
-                campos.push(`id_conta = $${valores.length + 1}`)
-                valores.push(id_conta);
-            }
-
-            if (id_categoria !== undefined) {
-                campos.push(`id_categoria = $${valores.length + 1}`)
-                valores.push(id_categoria);
-            }
-
-            if (id_subcategoria !== undefined) {
-                campos.push(`id_subcategoria = $${valores.length + 1}`)
-                valores.push(id_subcategoria);
-            }
-
-            if (id_usuario !== undefined) {
-                campos.push(`id_usuario = $${valores.length + 1}`)
-                valores.push(id_usuario);
-            }
-
-            if (num_parcelas !== undefined) {
-                campos.push(`num_parcelas = $${valores.length + 1}`)
-                valores.push(num_parcelas);
-            }
-
-            if (parcela_atual !== undefined) {
-                campos.push(`parcela_atual = $${valores.length + 1}`)
-                valores.push(parcela_atual);
-            }
-
-            if (campos.length === 0) {
-                return res.status(400).json({ error: "Nenhum campo para atualizar" });
-            }
-            const query = `UPDATE transacoes SET ${campos.join(", ")} WHERE id_transacao = ${id_transacao} RETURNING *`;
-            const transacao = await BD.query(query, valores);
-
-            if (transacao.rows.length === 0) {
-                return res.status(404).json({ error: "Transação não encontrada" });
-            }
-
-            res.status(200).json("Transação atualizada com sucesso!");
-        } catch (error) {
-            console.error("Erro ao atualizar a transação:", error);
-            res.status(500).json({ error: "Erro ao atualizar a transação" });
-        }
+    try {
+      const transacao = await BD.query(
+        "DELETE FROM transacoes WHERE id_transacao = $1 RETURNING *",
+        [id_transacao]
+      );
+      if (transacao.rows.length === 0) {
+        return res.status(404).json({ error: "Transação não encontrada" });
+      }
+      res.status(200).json("Transação excluída com sucesso!");
+    } catch (error) {
+      console.error("Erro ao excluir a transação:", error);
+      res.status(500).json({ error: "Erro ao excluir a transação" });
     }
+  }
 
-    static async deletar(req,res){
-        const { id_transacao } = req.params;
+  //criar rota pra filtrar transacoes por data de vencimento ou pagamento
+  //dentro de um intervalo específico
 
-        try {
-            const transacao = await BD.query("DELETE FROM transacoes WHERE id_transacao = $1 RETURNING *", [id_transacao]);
-            if (transacao.rows.length === 0) {
-                return res.status(404).json({ error: "Transação não encontrada" });
-            }
-            res.status(200).json("Transação excluída com sucesso!");
-        } catch (error) {
-            console.error("Erro ao excluir a transação:", error);
-            res.status(500).json({ error: "Erro ao excluir a transação" });
-            
-        }
+  static async filtrarPorData(req, res) {
+    const { data_inicio, data_fim, tipo_data } = req.query;
+
+    let colunaData;
+    if (tipo_data == "vencimento") {
+      colunaData = "data_vencimento";
+    } else if (tipo_data == "pagamento") {
+      colunaData = "data_pagamento";
+    } else {
+      return res.status(400).json({
+        error: "Tipo de data inválido, use 'vencimento' ou 'pagamento'",
+      });
     }
-
-    //criar rota pra filtrar transacoes por data de vencimento ou pagamento
-    //dentro de um intervalo específico
-
-    static async filtrarPorData(req, res) {
-      const { data_inicio, data_fim, tipo_data } = req.query;
-
-      let colunaData
-      if (tipo_data == 'vencimento'){
-        colunaData = 'data_vencimento'
-      }
-      else if (tipo_data == 'pagamento'){
-        colunaData = 'data_pagamento'
-      }
-      else{
-        return res.status(400).json({ error: "Tipo de data inválido, use 'vencimento' ou 'pagamento'" });
-      }
-      try {
-        const query = `SELECT t.*, u.nome as nome_usuario, ct.nome as nome from transacoes as t
+    try {
+      const query = `SELECT t.*, u.nome as nome_usuario, ct.nome as nome from transacoes as t
         left join usuarios as u on t.id_usuario = u.id_usuario
         join contas as ct on t.id_conta = ct.id_conta
         WHERE ${colunaData} BETWEEN $1 AND $2
         order by ${colunaData} asc
-        `
-        const transacoes = await BD.query(query, [data_inicio, data_fim]);
-        res.status(200).json(transacoes.rows);
-        
-        if (transacoes.rows.length === 0) {
-          return res.status(404).json({ error: "Nenhuma transação encontrada" });
-        }
-      }
-      catch (error) {
-        console.error("Erro ao filtrar transações por data:", error);
-        res.status(500).json({message: "Erro ao filtrar transações por data" , error: error.message });
-      }
-    }
+        `;
+      const transacoes = await BD.query(query, [data_inicio, data_fim]);
+      res.status(200).json(transacoes.rows);
 
-    //somando transacoes entrada ou saida
-    static async somarTransacoes (req, res) {
-      const { tipo, id_usuario} = req.query;
-      try{
-        const tipoTransacao = tipo.toUpperCase();
-        const query = `
+      if (transacoes.rows.length === 0) {
+        return res.status(404).json({ error: "Nenhuma transação encontrada" });
+      }
+    } catch (error) {
+      console.error("Erro ao filtrar transações por data:", error);
+      res.status(500).json({
+        message: "Erro ao filtrar transações por data",
+        error: error.message,
+      });
+    }
+  }
+
+  //somando transacoes entrada ou saida
+  static async somarTransacoes(req, res) {
+    const { tipo, id_usuario } = req.query;
+    try {
+      const tipoTransacao = tipo.toUpperCase();
+      const query = `
           SELECT SUM(valor) as total 
           FROM transacoes
           WHERE tipo_transacao = $1 AND id_usuario = $2
-          `
-        const resultado = await BD.query(query, [tipoTransacao, id_usuario]);
+          `;
+      const resultado = await BD.query(query, [tipoTransacao, id_usuario]);
 
-        let total = resultado.rows[0].total;
+      let total = resultado.rows[0].total;
 
-        if (total === null) {
-          total = 0
-        }
-        res.status(200).json({total: parseFloat(total)});
-      } catch (error) {
-        console.error("Erro ao somar transações:", error);
-        res.status(500).json({ error: "Erro ao somar transações" });
+      if (total === null) {
+        total = 0;
       }
+      res.status(200).json({ total: parseFloat(total) });
+    } catch (error) {
+      console.error("Erro ao somar transações:", error);
+      res.status(500).json({ error: "Erro ao somar transações" });
     }
+  }
 
-    //consulta para pagamentos vencidos7
-    static async transacoesVencidas(req, res){
-      const { id_usuario } = req.query;
-      try {
-        const query = `
+  //consulta para pagamentos vencidos7
+  static async transacoesVencidas(req, res) {
+    const { id_usuario } = req.query;
+    try {
+      const query = `
           SELECT t.valor, t.data_vencimento, t.data_pagamento, t.data_transacao,
           u.nome as nome_usuario, 
           ct.nome as nome_categoria, 
@@ -363,31 +441,34 @@ class RotasTransacoes {
           LEFT JOIN subcategorias sct ON t.id_subcategoria = sct.id_subcategoria
           WHERE t.data_vencimento < CURRENT_DATE AND t.id_usuario = $1
           ORDER BY t.data_vencimento ASC
-          `
-        const transacoes = await BD.query(query, [id_usuario]);
+          `;
+      const transacoes = await BD.query(query, [id_usuario]);
 
-        //funcao para formatar data
-        const formatarDataBr = (data) => {
-          if(!data) return null
-          return new Date(data).toLocaleDateString('pt-BR'); //converte a data para o padrão BR
-        }
+      //funcao para formatar data
+      const formatarDataBr = (data) => {
+        if (!data) return null;
+        return new Date(data).toLocaleDateString("pt-BR"); //converte a data para o padrão BR
+      };
 
-        const dadosFormatados = transacoes.rows.map(t => ({
-          ...t, //copia todas as propriedades origais da resultado para a "t"
-          data_transacao: formatarDataBr(t.data_transacao),
-          data_vencimento: formatarDataBr(t.data_vencimento),
-          data_pagamento: formatarDataBr(t.data_pagamento),
-        }))
-        res.status(200).json(dadosFormatados);
+      const dadosFormatados = transacoes.rows.map((t) => ({
+        ...t, //copia todas as propriedades origais da resultado para a "t"
+        data_transacao: formatarDataBr(t.data_transacao),
+        data_vencimento: formatarDataBr(t.data_vencimento),
+        data_pagamento: formatarDataBr(t.data_pagamento),
+      }));
+      res.status(200).json(dadosFormatados);
 
-        if (transacoes.rows.length === 0) {
-          return res.status(404).json({ error: "Nenhuma transação encontrada" });
-        }
-      } catch (error) {
-        console.error("Erro ao buscar transações vencidas:", error);
-        res.status(500).json({message: "Erro ao buscar transacoes vencidas", error: error.message });
+      if (transacoes.rows.length === 0) {
+        return res.status(404).json({ error: "Nenhuma transação encontrada" });
       }
+    } catch (error) {
+      console.error("Erro ao buscar transações vencidas:", error);
+      res.status(500).json({
+        message: "Erro ao buscar transacoes vencidas",
+        error: error.message,
+      });
     }
+  }
 }
 
 export default RotasTransacoes;
