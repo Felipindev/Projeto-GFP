@@ -122,7 +122,7 @@ export default function TransacaoModal({
       alert("Preencha os campos obrigatórios, marcados com *");
       return;
     }
-
+    
     const dados = {
       valor: parseFloat(valor),
       descricao: descricao,

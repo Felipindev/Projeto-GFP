@@ -160,37 +160,53 @@ class RotasTransacoes {
 
       //query para listar ulitmos vencimentos
       const vencimentoQuery = `
-    SELECT 
-        t.valor::float,
-        t.descricao,
-        t.data_vencimento,
+        SELECT 
+          t.valor::float,
+          t.descricao,
+          t.data_vencimento,
 
-        c.icone,
-        c.cor,
+          c.icone,
+          c.cor,
 
-        sc.nome AS nome_subcategoria
+          sc.nome AS nome_subcategoria
 
-        FROM transacoes t
-        JOIN categorias c ON t.id_categoria = c.id_categoria
-        JOIN subcategorias sc ON t.id_subcategoria = sc.id_subcategoria
-        WHERE t.data_vencimento BETWEEN $1 AND $2 AND t.data_pagamento IS NULL
-        ORDER BY t.data_vencimento`;
+          FROM transacoes t
+          JOIN categorias c ON t.id_categoria = c.id_categoria
+          JOIN subcategorias sc ON t.id_subcategoria = sc.id_subcategoria
+          WHERE t.data_vencimento BETWEEN $1 AND $2 AND t.data_pagamento IS NULL
+          ORDER BY t.data_vencimento`;
+
+      const evolucao6mesesQuery = `
+        SELECT
+            TO_CHAR(t.data_vencimento, 'MM/YYYY') AS mes,
+            SUM(CASE WHEN t.tipo_transacao = 'ENTRADA' THEN t.valor ELSE 0 END)::float AS total_receitas,
+            SUM(CASE WHEN t.tipo_transacao = 'SAIDA' THEN t.valor ELSE 0 END)::float AS total_despesas
+        FROM transacoes AS t
+        JOIN categorias ct ON t.id_categoria = ct.id_categoria
+        JOIN subcategorias sct ON t.id_subcategoria = sct.id_subcategoria
+        WHERE 
+            t.data_vencimento >= (CURRENT_DATE - INTERVAL '6 months')
+        GROUP BY TO_CHAR(t.data_vencimento, 'MM/YYYY')
+        ORDER BY TO_DATE(TO_CHAR(t.data_vencimento, 'MM/YYYY'), 'MM/YYYY');
+      `;
 
       //executando todas as querys em paralelo para otimizar
-      const [kpis, categorias, subcategorias, vencimentos] = await Promise.all([
-        BD.query(kpisQuery, [dataInicio, dataFim]),
-        BD.query(categoriasQuery, [dataInicio, dataFim]),
-        BD.query(subcategoriasQuery, [dataInicio, dataFim]),
-        BD.query(vencimentoQuery, [dataInicio, dataFim])
-      ])
+      const [kpis, categorias, subcategorias, vencimentos, evolucao6meses] =
+        await Promise.all([
+          BD.query(kpisQuery, [dataInicio, dataFim]),
+          BD.query(categoriasQuery, [dataInicio, dataFim]),
+          BD.query(subcategoriasQuery, [dataInicio, dataFim]),
+          BD.query(vencimentoQuery, [dataInicio, dataFim]),
+          BD.query(evolucao6mesesQuery),
+        ]);
 
       res.status(200).json({
         kpis: kpis.rows[0],
         categorias: categorias.rows,
         subcategorias: subcategorias.rows,
         vencimentos: vencimentos.rows,
-      })
-
+        evolucao6meses: evolucao6meses.rows,
+      });
     } catch (error) {
       console.error("Erro ao listar dados:", error);
       res.status(500).json({ error: "Erro ao listar dados" });
