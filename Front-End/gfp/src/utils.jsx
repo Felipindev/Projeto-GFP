@@ -329,3 +329,8 @@ export const calcularDatasPeriodo = (periodo) => {
 
   return { dataInicio, dataFim };
 }
+
+export const formatarData = (data) => {
+  const dataFormatada = new Date(data);
+  return dataFormatada.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+}

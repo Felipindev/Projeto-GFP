@@ -172,7 +172,7 @@ export default function Dashboard() {
           },
           body: JSON.stringify({
             model: 'gpt-4o-mini',
-            message: [{role: 'user', content: prompt}],
+            messages: [{role: 'user', content: prompt}],
             max_tokens: 300,
             temperature: 0.7,
           })

@@ -2,6 +2,7 @@ import { createDrawerNavigator } from "@react-navigation/drawer";
 import Principal from "./Principal";
 import Contas from "./Contas";
 import Categorias from "./Categorias"
+import Transacoes from "./Transacoes";
 
 const Drawer = createDrawerNavigator();
 
@@ -23,6 +24,7 @@ export default function MenuDrawer(){
             }}
         >
             <Drawer.Screen name="PRINCIPAL" component={Principal} />
+            <Drawer.Screen name="TRANSACOES" component={Transacoes} />
             <Drawer.Screen name="CONTAS" component={Contas} />
             <Drawer.Screen name='CATEGORIAS' component={Categorias} />
         </Drawer.Navigator>

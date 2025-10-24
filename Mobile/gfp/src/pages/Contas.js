@@ -24,7 +24,9 @@ export default function Contas ({navigation}) {
                 }
             });
             const dados = await resposta.json();
-            setDadosLista(dados);
+            setDadosLista(dados)
+            console.log(dados);
+            
         }catch (error) {
             console.error("Erro ao buscar dados da API:", error);
         }
@@ -106,7 +108,7 @@ export default function Contas ({navigation}) {
                 <FlatList
                    data={dadosLista}
                    renderItem={exibirItemLista}
-                   keyExtractor={(item) => item.id_conta} 
+                   keyExtractor={(item) => String(item.id_conta)} 
                    refreshControl={
                     <RefreshControl
                         refreshing={atualizando}
